@@ -1,0 +1,1112 @@
+{
+	"info": {
+		"_postman_id": "ec6d6c1e-bb06-4116-9fad-acaca457fe6d",
+		"name": "Project-CK",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "41581051"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"Admin\",\n  \"email\": \"sridharselvaraj021@gmail.com\",\n  \"password\": \"Admin@1\",\n  \"RoleId\": 1\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"sridharselvaraj021@gmail.com\",\n  \"password\": \"Admin@1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ForgotPass",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\" : \"sridharselvaraj9102001@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/forgotPassword",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"forgotPassword"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ResetPass",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\" : \"sridharselvaraj9102001@gmail.com\",\n    \"atoken\" : \"2e3124e0d2f9bb05ddb89144b54747831d371c671ba095242caefd93f1154553\",\n    \"newPassword\": \"Admin@001\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/resetPass",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"resetPass"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\" : \"sridharselvaraj021@gmail.com\",\n    \"verificationCode\" : \"220460\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/verifyUser",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"verifyUser"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Branch",
+			"item": [
+				{
+					"name": "New Branch",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\" : \"Sri Foods\",\n    \"address\" : \"Madiwala\",\n    \"phone_number\" : 6382600641\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/branch",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"branch"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all Branch",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/branch",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"branch"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Branch by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/branch/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"branch",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Edit Branch",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"VRS Catering\",\n  \"address\": \"Swamimalai\",\n  \"phone_number\": \"987-654-3210\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/branch/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"branch",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Branch",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/branch/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"branch",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Details of All Branch",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/branch/filter",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"branch",
+								"filter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Details by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/branch/1/details",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"branch",
+								"1",
+								"details"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Category",
+			"item": [
+				{
+					"name": "Create Category",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJrdW1hci5zIiwiZW1haWwiOiJrdW1hckBnbWFpbC5jb20iLCJSb2xlSWQiOjIsImlhdCI6MTcxODA5ODYzMywiZXhwIjoxNzE4MTAyMjMzfQ.d_s4dfSM45eibRxdALAbjANpf33VSE-lvu2PbeRLohU",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Chinese Cusine\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/categories",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/categories",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"categories"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Category by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/categories/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"categories",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Category",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"BBQ\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/categories/8",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"categories",
+								"8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Category",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/categories/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"categories",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Filter",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/categories/search?q=B",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"categories",
+								"search"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "B"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Menu",
+			"item": [
+				{
+					"name": "Add Menu",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Non veg Lollipop\",\n  \"description\": \"Delicious 65 lettuce and mayo\",\n  \"price\": \"359.00\",\n  \"CategoryId\": 1,\n  \"BranchId\": 2,\n  \"status\": \"AVAILABLE\",\n  \"preparationTime\": 15,\n  \"isSpecial\": false\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/menu",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"menu"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Menu",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/menu",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"menu"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/menu/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"menu",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Menu",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJBZG1pbiIsImVtYWlsIjoic3JpZGhhcnNlbHZhcmFqMDIxQGdtYWlsLmNvbSIsIlJvbGVJZCI6MSwidXNlckNJRklkIjoiQ0lGNTQzNDcxIiwiaWF0IjoxNzI1ODE0ODY5LCJleHAiOjE3MjU4MTg0Njl9.GFn5bj4nMgSSKbBLq8mqKvh4QrSgczWu3W8SSd2REvk",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "  {\n    \"rating\": 4.8\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/menu/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"menu",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete menu",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJzcmlkaGFyLnMiLCJlbWFpbCI6InNyaWRoYXJzZWx2YXJhajAyQGdtYWlsLmNvbSIsIlJvbGVJZCI6MSwiaWF0IjoxNzE4MTEwNzUwLCJleHAiOjE3MTgxMTQzNTB9.sDE9IUTz3OUtp8npNsUv3a5S72_d9-bV_5leWjdwihQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/menu/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"menu",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Filter Menu",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"categoryId\": 3\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/menu/filter/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"menu",
+								"filter",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Oder Food",
+			"item": [
+				{
+					"name": "New Order",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"BranchId\": 1,\n  \"items\": [\n    {\n      \"MenuItemId\": 1,\n      \"quantity\": 1\n    },\n    {\n      \"MenuItemId\": 3,\n      \"quantity\": 1\n    }\n  ],\n  \"customerName\": \"John Doe\",\n  \"customerContact\": \"+1234567890\",\n  \"customerAddress\": \"123 Main Street, Apt 4B, City, Country\",\n  \"notes\": \"Please include extra napkins.\",\n  \"specialInstructions\": \"No onions in the dish.\",\n  \"paymentMethod\": \"online\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/orders",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Order Completed",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJrdW1hci5zIiwiZW1haWwiOiJrdW1hckBnbWFpbC5jb20iLCJSb2xlSWQiOjIsImlhdCI6MTcxODA5OTE3NSwiZXhwIjoxNzE4MTAyNzc1fQ.B6W4Rs5Hbop0iYd6WqYo2OTKkuNOXBLUJN4So0XFTFk",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/orders/3/status",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"orders",
+								"3",
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Order",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJrdW1hci5zIiwiZW1haWwiOiJrdW1hckBnbWFpbC5jb20iLCJSb2xlSWQiOjIsImlhdCI6MTcxODA5OTE3NSwiZXhwIjoxNzE4MTAyNzc1fQ.B6W4Rs5Hbop0iYd6WqYo2OTKkuNOXBLUJN4So0XFTFk",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/orders/3/cancel",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"orders",
+								"3",
+								"cancel"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Orders",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/orders",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order By Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/orders/21",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"orders",
+								"21"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bulk Filter",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/orders/getFilteredOrder",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"orders",
+								"getFilteredOrder"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Offer",
+			"item": [
+				{
+					"name": "Add Offer",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Special Discount\",\n    \"description\": \"Get 30% off on all orders above $50\",\n    \"discount_percentage\": 30,\n    \"valid_from\": \"2024-06-01T00:00:00.000Z\",\n    \"valid_to\": \"2024-06-10T23:59:59.999Z\",\n    \"min_order_amount\": 50\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/offers",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"offers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Offer",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Discount\",\n    \"description\": \"Get 30% off on all orders above $100\",\n    \"discount_percentage\": 30,\n    \"valid_from\": \"2024-06-01T00:00:00.000Z\",\n    \"valid_to\": \"2024-10-31T23:59:59.999Z\",\n    \"min_order_amount\": 500\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/offers/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"offers",
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Address",
+			"item": [
+				{
+					"name": "Add Address",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJzcmlkaGFyLnMiLCJlbWFpbCI6InNyaWRoYXJzZWx2YXJhajAyQGdtYWlsLmNvbSIsIlJvbGVJZCI6MSwiaWF0IjoxNzE4MTA0NDg0LCJleHAiOjE3MTgxMDgwODR9.O9nSPksSkS6QqsVHefG31ByJ_comdHiWNmPzIo2LDJk",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"address\": \"123 Main St\",\n  \"city\": \"Swamimalai\",\n  \"state\": \"TN\",\n  \"country\": \"India\",\n  \"postalCode\": \"612302\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/userAddresses",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"userAddresses"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Review",
+			"item": [
+				{
+					"name": "Add Review",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJzcmlkaGFyLnMiLCJlbWFpbCI6InNyaWRoYXJzZWx2YXJhajAyQGdtYWlsLmNvbSIsIlJvbGVJZCI6MSwiaWF0IjoxNzE4MTA0NDg0LCJleHAiOjE3MTgxMDgwODR9.O9nSPksSkS6QqsVHefG31ByJ_comdHiWNmPzIo2LDJk",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"MenuItemId\": 1,\n  \"rating\": 4,\n  \"comment\": \"Great food, loved it!\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/userAddresses",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"userAddresses"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJBZG1pbiIsImVtYWlsIjoic3JpZGhhcnNlbHZhcmFqMDIxQGdtYWlsLmNvbSIsIlJvbGVJZCI6MSwidXNlckNJRklkIjoiQ0lGOTM5MDMyIiwiaWF0IjoxNzM3OTk5NTY2LCJleHAiOjE3MzgwMDMxNjZ9.LGl9ZStcFtpQ5bnxwqp0vkpEpBXW-YxclRnD3oJN1ZU",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

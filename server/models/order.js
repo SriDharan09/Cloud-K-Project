@@ -83,6 +83,17 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+  },
+  {
+    scopes: {
+      basicInfo: {
+        attributes: [
+          'id', 'total_price', 'status', 'TxnReferenceNumber', 'paymentMethod',
+          'paymentStatus', 'notes', 'specialInstructions', 'discountAmount', 'taxAmount',
+          'trackingNumber', 'estimatedDeliveryTime', 'createdAt', 'updatedAt'
+        ]
+      },
+    }
   });
 
   Order.associate = (models) => {

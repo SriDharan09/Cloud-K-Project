@@ -6,7 +6,7 @@ router.post('/register', register);
 router.post('/verifyUser', verifyEmail);
 router.post('/login', login);
 router.post('/forgotPassword', forgotPassword);
-router.post('/resetPass', resetPassword);
+router.post('/resetPass/:atoken', resetPassword);
 
 
 

@@ -19,15 +19,13 @@ const customLevels = {
   },
 };
 
-// Log directory for Category Logs
-const logDir = path.join(__dirname, '..', 'logs', 'Category Logs');
+const logDir = path.join(__dirname, '..', '..', 'logs', 'Authentication Logs');
 if (!fs.existsSync(logDir)) {
   fs.mkdirSync(logDir, { recursive: true });
 }
-
 // Daily rotate file transport
 const dailyRotateFileTransport = new DailyRotateFile({
-  filename: path.join(logDir, 'Category-%DATE%.log'),
+  filename: path.join(logDir, 'Auth-%DATE%.log'),
   datePattern: 'YYYY-MM-DD',
   maxSize: '20m',
   maxFiles: '14d',
@@ -55,7 +53,7 @@ const consoleTransport = new transports.Console({
   ),
 });
 
-const categoryLogger = createLogger({
+const authLogger = createLogger({
   levels: customLevels.levels,
   transports: [
     dailyRotateFileTransport,
@@ -66,4 +64,4 @@ const categoryLogger = createLogger({
 // Apply colors to the console logs
 require('winston').addColors(customLevels.colors);
 
-module.exports = categoryLogger;
+module.exports = authLogger;

@@ -1,6 +1,6 @@
 const { sequelize } = require('../models'); // Import sequelize instance
 const { Branch, AuditLog } = require('../models');
-const branchLogger = require('../utils/branchLogger'); // Update the path accordingly
+const branchLogger = require('../utils/logger/branchLogger'); // Update the path accordingly
 
 exports.createBranch = async (req, res) => {
   const requestInfo = { method: req.method, url: req.url, body: req.body };

@@ -1,6 +1,6 @@
 const { Category,AuditLog } = require('../models');
 const { Op } = require('sequelize');
-const categoryLogger = require('../utils/categoryLogger'); // Update the path if needed
+const categoryLogger = require('../utils/logger/categoryLogger'); // Update the path if needed
 
 exports.createCategory = async (req, res) => {
   const requestInfo = { method: req.method, url: req.url, body: req.body };

@@ -1,11 +1,11 @@
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 
-const sendEmail = async ({ to, subject, text,html }) => {
+const sendEmail = async ({ to, subject, text, html }) => {
   const transporter = nodemailer.createTransport({
-    service: 'Outlook', 
+    service: "gmail",
     auth: {
       user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS, 
+      pass: process.env.EMAIL_PASS,
     },
   });
 
@@ -14,13 +14,13 @@ const sendEmail = async ({ to, subject, text,html }) => {
       from: process.env.EMAIL_USER,
       to,
       subject,
-      text,  // Optional plain text version of the email
-      html   // HTML content
+      text,
+      html,
     });
-    console.log('Email sent successfully');
+    console.log("Email sent successfully");
   } catch (error) {
-    console.error('Failed to send email:', error);
-    throw new Error('Failed to send email');
+    console.error("Failed to send email:", error);
+    throw new Error("Failed to send email");
   }
 };
 

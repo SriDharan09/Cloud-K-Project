@@ -19,15 +19,15 @@ const customLevels = {
   },
 };
 
-// Define the log directory and ensure it exists for menuItemLogger
-const menuLogDir = path.join(__dirname, '..', 'logs', 'Menu Logs');
-if (!fs.existsSync(menuLogDir)) {
-  fs.mkdirSync(menuLogDir, { recursive: true });
+// Log directory for Category Logs
+const logDir = path.join(__dirname, '..', '..', 'logs', 'Category Logs');
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true });
 }
 
-// Daily rotate file transport for menuItemLogger
-const dailyRotateFileTransportMenu = new DailyRotateFile({
-  filename: path.join(menuLogDir, 'Menu-%DATE%.log'),
+// Daily rotate file transport
+const dailyRotateFileTransport = new DailyRotateFile({
+  filename: path.join(logDir, 'Category-%DATE%.log'),
   datePattern: 'YYYY-MM-DD',
   maxSize: '20m',
   maxFiles: '14d',
@@ -37,8 +37,8 @@ const dailyRotateFileTransportMenu = new DailyRotateFile({
   ),
 });
 
-// Console transport with timestamp first for menuItemLogger
-const consoleTransportMenu = new transports.Console({
+// Console transport with timestamp first
+const consoleTransport = new transports.Console({
   level: 'debug',
   format: format.combine(
     format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
@@ -55,16 +55,15 @@ const consoleTransportMenu = new transports.Console({
   ),
 });
 
-// Create menuItemLogger
-const menuItemLogger = createLogger({
+const categoryLogger = createLogger({
   levels: customLevels.levels,
   transports: [
-    dailyRotateFileTransportMenu,
-    consoleTransportMenu,
+    dailyRotateFileTransport,
+    consoleTransport, // Ensure console transport is included
   ],
 });
 
 // Apply colors to the console logs
 require('winston').addColors(customLevels.colors);
 
-module.exports = menuItemLogger;
+module.exports = categoryLogger;

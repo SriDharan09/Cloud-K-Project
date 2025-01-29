@@ -1,14 +1,25 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { createOrder, getOrders, getOrderById, updateOrderStatus, deleteOrder, cancelOrder ,getFilteredOrder} = require('../controllers/orderController');
-const authMiddleware = require('../middleware/auth');
+const {
+  createOrder,
+  getOrders,
+  getbyTxnData,
+  getOrderById,
+  getFilteredOrder,
+  updateOrderStatus,
+  deleteOrder,
+  cancelOrder,
+} = require("../controllers/orderController");
+const authMiddleware = require("../middleware/auth");
 
-router.post('/', authMiddleware, createOrder);
-router.get('/', authMiddleware, getOrders);
-router.get('/:id', authMiddleware, getFilteredOrder);
-router.get('/getFilteredOrder', authMiddleware, getOrderById);
-router.put('/:id/cancel', authMiddleware, cancelOrder);
-router.put('/:id/status', authMiddleware, updateOrderStatus);
-router.delete('/:id', authMiddleware, deleteOrder);
+// Define specific routes before general ones
+router.post("/", authMiddleware, createOrder);
+router.get("/getByTxnNum", authMiddleware, getbyTxnData); // Specific route
+router.get("/getFilteredOrder", authMiddleware, getFilteredOrder); // Specific route
+router.get("/", authMiddleware, getOrders);
+router.get("/:id", authMiddleware, getOrderById); // General route (placed last)
+router.put("/:id/cancel", authMiddleware, cancelOrder);
+router.put("/:id/status", authMiddleware, updateOrderStatus);
+router.delete("/:id", authMiddleware, deleteOrder);
 
 module.exports = router;

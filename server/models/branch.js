@@ -1,5 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
-    const Branch = sequelize.define('Branch', {
+  const Branch = sequelize.define(
+    "Branch",
+    {
       name: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -11,8 +13,16 @@ module.exports = (sequelize, DataTypes) => {
       phone_number: {
         type: DataTypes.STRING,
       },
-    });
-  
-    return Branch;
-  };
-  
+    },
+    {
+      scopes: {
+        // Scope to include basic branch details
+        basicInfo: {
+          attributes: ["id", "name", "address", "phone_number"],
+        },
+      },
+    }
+  );
+
+  return Branch;
+};

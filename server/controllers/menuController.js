@@ -1,6 +1,6 @@
 const { MenuItem, Category, Branch ,AuditLog} = require('../models');
 const { Op } = require('sequelize');
-const menuItemLogger = require('../utils/menuItemLogger'); 
+const menuItemLogger = require('../utils/logger/menuItemLogger'); 
 
 exports.createMenuItem = async (req, res) => {
   const requestInfo = { method: req.method, url: req.url, body: req.body };

@@ -8,6 +8,7 @@ const {
 } = require("../models");
 const orderLogger = require("../utils/logger/ordersLogger");
 const crypto = require("crypto");
+const { formatOrderResponse } = require("../utils/orderFormatter");
 const orderAttributes = [
   "id",
   "total_price",
@@ -330,102 +331,20 @@ exports.getOrders = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
 
-    // const { count: totalOrders, rows: orders } = await Order.findAndCountAll({
-    //   include: [
-    //     {
-    //       model: User,
-    //       attributes: ["id", "username", "email"], // Only include necessary fields
-    //     },
-    //     {
-    //       model: Branch,
-    //       attributes: ["id", "name", "address", "phone_number"], // Only include necessary fields
-    //     },
-    //     {
-    //       model: OrderItem,
-    //       include: [
-    //         {
-    //           model: MenuItem,
-    //           attributes: ["id", "name", "price"], // Only include necessary fields
-    //         },
-    //       ],
-    //       attributes: ["id", "quantity", "price"], // Only include necessary fields
-    //     },
-    //   ],
-    //   attributes: [
-    //     "id",
-    //     "total_price",
-    //     "status",
-    //     "paymentMethod",
-    //     "paymentStatus",
-    //     "notes",
-    //     "specialInstructions",
-    //     "discountAmount",
-    //     "taxAmount",
-    //     "trackingNumber",
-    //     "estimatedDeliveryTime",
-    //     "createdAt",
-    //     "updatedAt", // Only include necessary fields
-    //   ],
-    //   limit,
-    //   offset,
-    //   order: [["createdAt", "DESC"]], // Optional: to sort by creation date
-    // });
     const { count: totalOrders, rows: orders } = await Order.findAndCountAll({
       include: [
-        {
-          model: User.scope("profile"), // Apply the 'basicInfo' scope to the User model
-        },
-        {
-          model: Branch.scope("basicInfo"), // Apply the 'basicInfo' scope to the Branch model
-        },
-        {
-          model: OrderItem.scope("withMenuItem"), // Apply the 'withMenuItem' scope to the OrderItem model
-        },
+        { model: User.scope("profile") },
+        { model: Branch.scope("basicInfo") },
+        { model: OrderItem.scope("withMenuItem") },
       ],
       attributes: orderAttributes,
       limit,
       offset,
-      order: [["createdAt", "DESC"]], // Optional: to sort by creation date
+      order: [["createdAt", "DESC"]],
     });
-
+    console.log("Orders Data:", orders); // Debugging: Log the orders response
     const totalPages = Math.ceil(totalOrders / limit);
-
-    // Structure the response data
-    const structuredOrders = orders.map((order) => ({
-      orderDetails: {
-        id: order.id,
-        total_price: parseFloat(order.total_price).toFixed(2),
-        status: order.status,
-        paymentMethod: order.paymentMethod,
-        paymentStatus: order.paymentStatus,
-        notes: order.notes,
-        specialInstructions: order.specialInstructions,
-        discountAmount: parseFloat(order.discountAmount).toFixed(2),
-        taxAmount: parseFloat(order.taxAmount).toFixed(2),
-        trackingNumber: order.trackingNumber,
-        estimatedDeliveryTime: order.estimatedDeliveryTime,
-        createdAt: new Date(order.createdAt).toLocaleString(),
-        updatedAt: new Date(order.updatedAt).toLocaleString(),
-      },
-      customerDetails: {
-        id: order.User?.id || null,
-        username: order.User?.username || null,
-        email: order.User?.email || null,
-      },
-      branchDetails: {
-        id: order.Branch?.id || null,
-        name: order.Branch?.name || null,
-        address: order.Branch?.address || null,
-        phoneNumber: order.Branch?.phone_number || null,
-      },
-      items: order.OrderItems.map((item) => ({
-        id: item.id,
-        name: item.MenuItem?.name || null,
-        quantity: item.quantity,
-        price: parseFloat(item.price).toFixed(2),
-        total: (item.quantity * parseFloat(item.price)).toFixed(2),
-      })),
-    }));
+    const structuredOrders = formatOrderResponse(orders);
 
     res.json({
       totalOrders: orders.length,
@@ -440,114 +359,19 @@ exports.getOrders = async (req, res) => {
 
 exports.getOrderById = async (req, res) => {
   try {
-    // const order = await Order.findByPk(req.params.id, {
-    //   include: [
-    //     {
-    //       model: User,
-    //       attributes: ["id", "username", "email"], // Only include necessary fields
-    //     },
-    //     {
-    //       model: Branch,
-    //       attributes: ["id", "name", "address", "phone_number"], // Only include necessary fields
-    //     },
-    //     {
-    //       model: OrderItem,
-    //       include: [
-    //         {
-    //           model: MenuItem,
-    //           attributes: ["id", "name", "price"], // Only include necessary fields
-    //         },
-    //       ],
-    //       attributes: ["id", "quantity", "price"], // Only include necessary fields
-    //     },
-    //   ],
-    //   attributes: [
-    //     "id",
-    //     "total_price",
-    //     "status",
-    //     "paymentMethod",
-    //     "paymentStatus",
-    //     "notes",
-    //     "specialInstructions",
-    //     "discountAmount",
-    //     "taxAmount",
-    //     "trackingNumber",
-    //     "estimatedDeliveryTime",
-    //     "createdAt",
-    //     "updatedAt", // Only include necessary fields
-    //   ],
-    //   raw: false,
-    //   plain: true,
-    // });
     const order = await Order.findByPk(req.params.id, {
       include: [
-        {
-          model: User.scope("basicInfo"), // Apply the 'basicInfo' scope for User
-        },
-        {
-          model: Branch.scope("basicInfo"), // Apply the 'basicInfo' scope for Branch
-        },
-        {
-          model: OrderItem.scope("withMenuItem"), // Apply the 'withMenuItem' scope for OrderItem
-        },
+        { model: User.scope("detailedInfo") },
+        { model: Branch.scope("basicInfo") },
+        { model: OrderItem.scope("withMenuItem") },
       ],
       attributes: orderAttributes,
-      raw: false,
-      plain: true,
     });
 
     if (!order) {
       return res.status(404).json({ error: "Order not found" });
     }
-
-    // Extract order details
-    const orderDetails = {
-      id: order.id,
-      total_price: parseFloat(order.total_price).toFixed(2),
-      status: order.status,
-      paymentMethod: order.paymentMethod,
-      paymentStatus: order.paymentStatus,
-      notes: order.notes,
-      specialInstructions: order.specialInstructions,
-      discountAmount: parseFloat(order.discountAmount).toFixed(2),
-      taxAmount: parseFloat(order.taxAmount).toFixed(2),
-      trackingNumber: order.trackingNumber,
-      estimatedDeliveryTime: order.estimatedDeliveryTime,
-      createdAt: new Date(order.createdAt).toLocaleString(),
-      updatedAt: new Date(order.updatedAt).toLocaleString(),
-    };
-
-    // Extract customer details
-    const customerDetails = {
-      id: order.User.id,
-      username: order.User.username,
-      email: order.User.email, // Adjust based on what's appropriate to include
-    };
-
-    // Extract branch details
-    const branchDetails = {
-      id: order.Branch.id,
-      name: order.Branch.name,
-      address: order.Branch.address,
-      phoneNumber: order.Branch.phone_number,
-    };
-
-    // Extract order items
-    const items = order.OrderItems.map((item) => ({
-      id: item.id,
-      name: item.MenuItem.name,
-      quantity: item.quantity,
-      price: parseFloat(item.price).toFixed(2),
-      total: (item.quantity * parseFloat(item.price)).toFixed(2),
-    }));
-
-    // Send the structured response
-    res.json({
-      orderDetails,
-      customerDetails,
-      branchDetails,
-      items,
-    });
+    res.json({ orders: formatOrderResponse([order]) });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -560,97 +384,20 @@ exports.getFilteredOrder = async (req, res) => {
     const offset = (page - 1) * limit;
     const cifId = req.userCIFId;
 
-    // const { count: totalOrders, rows: orders } = await Order.findAndCountAll({
-    //   include: [
-    //     {
-    //       model: User,
-    //       where: { userCIFId: cifId }, // Filter by CIF ID
-    //       attributes: ["id", "username", "email"], // Only include necessary fields
-    //     },
-    //     {
-    //       model: Branch,
-    //       attributes: ["id", "name", "address", "phone_number"], // Only include necessary fields
-    //     },
-    //     {
-    //       model: OrderItem,
-    //       include: [
-    //         {
-    //           model: MenuItem,
-    //           attributes: ["id", "name", "price"], // Only include necessary fields
-    //         },
-    //       ],
-    //       attributes: ["id", "quantity", "price"], // Only include necessary fields
-    //     },
-    //   ],
-    //   attributes: [
-    //     "id",
-    //     "total_price",
-    //     "status",
-    //     "paymentMethod",
-    //     "paymentStatus",
-    //     "notes",
-    //     "specialInstructions",
-    //     "discountAmount",
-    //     "taxAmount",
-    //     "trackingNumber",
-    //     "estimatedDeliveryTime",
-    //     "createdAt",
-    //     "updatedAt", // Only include necessary fields
-    //   ],
-    //   limit,
-    //   offset,
-    //   order: [["createdAt", "DESC"]],
-    // });
-
     const { count: totalOrders, rows: orders } = await Order.findAndCountAll({
       include: [
-        {
-          model: User.scope("profile"), // Apply the 'basicInfo' scope for User
-          where: { userCIFId: cifId }, // Filter by CIF ID
-        },
-        {
-          model: Branch.scope("basicInfo"), // Apply the 'basicInfo' scope for Branch
-        },
-        {
-          model: OrderItem.scope("withMenuItem"), // Apply the 'withMenuItem' scope for OrderItem
-        },
+        { model: User.scope("profile"), where: { userCIFId: cifId } },
+        { model: Branch.scope("basicInfo") },
+        { model: OrderItem.scope("withMenuItem") },
       ],
       attributes: orderAttributes,
       limit,
       offset,
-      order: [["createdAt", "DESC"]], // Sort by creation date in descending order
+      order: [["createdAt", "DESC"]],
     });
 
     const totalPages = Math.ceil(totalOrders / limit);
-
-    // Structure the response data
-    const structuredOrders = orders.map((order) => ({
-      orderDetails: {
-        id: order.id,
-        total_price: parseFloat(order.total_price).toFixed(2),
-        status: order.status,
-        paymentMethod: order.paymentMethod,
-        paymentStatus: order.paymentStatus,
-        notes: order.notes,
-        specialInstructions: order.specialInstructions,
-        discountAmount: parseFloat(order.discountAmount).toFixed(2),
-        taxAmount: parseFloat(order.taxAmount).toFixed(2),
-        trackingNumber: order.trackingNumber,
-        estimatedDeliveryTime: order.estimatedDeliveryTime,
-        createdAt: new Date(order.createdAt).toLocaleString(),
-        updatedAt: new Date(order.updatedAt).toLocaleString(),
-      },
-      customerDetails: order.User,
-      branchDetails: order.Branch,
-      items: order.OrderItems.map((item) => ({
-        id: item.id,
-        name: item.MenuItem?.name || null,
-        quantity: item.quantity,
-        price: parseFloat(item.price).toFixed(2),
-        total: (item.quantity * parseFloat(item.price)).toFixed(2),
-      })),
-    }));
-
+    const structuredOrders = formatOrderResponse(orders);
     res.json({
       totalOrders: orders.length,
       totalPages,
@@ -664,49 +411,28 @@ exports.getFilteredOrder = async (req, res) => {
 
 exports.getbyTxnData = async (req, res) => {
   try {
-    const cifId = req.userCIFId;
     const { TxnReferenceNumber } = req.body;
-
-    // const orders = await Order.findAll({
-    //   where: {
-    //     TxnReferenceNumber: TxnReferenceNumber,
-    //   },
-    //   include: [
-    //     {
-    //       model: User,
-    //       attributes: ["id", "username", "email"], // Only include necessary fields
-    //     },
-    //     {
-    //       model: Branch,
-    //       attributes: ["id", "name", "address", "phone_number"], // Only include necessary fields
-    //     },
-    //     {
-    //       model: OrderItem,
-    //       include: [
-    //         {
-    //           model: MenuItem,
-    //           attributes: ["id", "name", "price"], // Only include necessary fields
-    //         },
-    //       ],
-    //       attributes: ["id", "quantity", "price"], // Only include necessary fields
-    //     },
-    //   ],
-    // });
     const orders = await Order.findAll({
       where: { TxnReferenceNumber },
       include: [
-        {
-          model: User.scope("basicInfo"),
-        },
-        {
-          model: Branch.scope("basicInfo"),
-        },
-        {
-          model: OrderItem.scope("withMenuItem"),
-        },
+        { model: User.scope("basicInfo") },
+        { model: Branch.scope("basicInfo") },
+        { model: OrderItem.scope("withMenuItem") },
       ],
     });
-    res.json(orders);
+
+    if (!orders.length) {
+      return res
+        .status(404)
+        .json({
+          error: "No orders found for the given transaction reference number.",
+        });
+    }
+    const structuredOrders = formatOrderResponse(orders);
+
+    res.json({
+      orders: structuredOrders,
+    });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

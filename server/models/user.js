@@ -80,10 +80,17 @@ module.exports = (sequelize, DataTypes) => {
     {
       scopes: {
         // Default scope: restrict sensitive fields like password
-        defaultScope: {
-          attributes: {
-            exclude: ["password", "resetToken", "resetTokenExpires"],
-          },
+        detailedInfo: {
+          attributes: [
+            "id",
+            "username",
+            "email",
+            "phoneNumber",
+            "address",
+            "preferences",
+            "createdAt",
+            "updatedAt",
+          ],
         },
         // Scope to include only basic user information
         basicInfo: {

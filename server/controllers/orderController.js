@@ -9,6 +9,10 @@ const {
 const orderLogger = require("../utils/logger/ordersLogger");
 const crypto = require("crypto");
 const { formatOrderResponse } = require("../utils/orderFormatter");
+const { log } = require("console");
+const { Op } = require("sequelize");
+const moment = require("moment-timezone");
+const cron = require("node-cron");
 const orderAttributes = [
   "id",
   "total_price",
@@ -24,26 +28,6 @@ const orderAttributes = [
   "createdAt",
   "updatedAt",
 ];
-
-// Function to calculate estimated preparation time
-function formatDate() {
-  const now = new Date();
-  const day = String(now.getDate()).padStart(2, "0");
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const year = String(now.getFullYear()).slice(-2);
-
-  return `${day}${month}${year}`;
-}
-function generateTxnReferenceNumber() {
-  const datePart = formatDate();
-  const randomPart = crypto.randomBytes(4).toString("hex");
-  return `TXN-${datePart}-${randomPart}`;
-}
-function generateTrackingNumber() {
-  const datePart = formatDate();
-  const randomPart = crypto.randomBytes(4).toString("hex");
-  return `TRK-${datePart}-${randomPart}`;
-}
 
 exports.createOrder = async (req, res) => {
   const performedBy = req.userCIFId;
@@ -61,6 +45,7 @@ exports.createOrder = async (req, res) => {
       notes,
       specialInstructions,
       paymentMethod,
+      deliveryDistance,
     } = req.body;
 
     let discountedTotalPrice = 0;
@@ -172,36 +157,57 @@ exports.createOrder = async (req, res) => {
     const finalTotalPrice = discountedTotalPrice + taxAmount + deliveryFee;
 
     // Calculate Estimated Preparation Time
-    const calculateEstimatedTime = async (items) => {
-      let totalTime = 0;
-      const bulkFactor = 0.75;
-      const timeMap = new Map();
+    const calculateEstimatedTime = async (items, deliveryDistance = 5) => {
+      let totalPrepTime = 0;
+      const bulkFactor = 6.32;
+      const bulkThreshold = 3;
+      const deliveryBaseTime = 5; // Base delivery time in minutes
+      const deliveryPerKm = 2; // Additional time per km
+
+      // Fetch all MenuItem data in one query
+      const menuItemIds = items.map((item) => item.MenuItemId);
+      const menuItems = await MenuItem.findAll({ where: { id: menuItemIds } });
+
+      // Create a map for MenuItem preparation times
+      const prepTimeMap = new Map();
+      menuItems.forEach((menuItem) => {
+        prepTimeMap.set(menuItem.id, parseFloat(menuItem.preparationTime) || 0);
+      });
 
       for (const item of items) {
         const { MenuItemId, quantity } = item;
-        const menuItem = await MenuItem.findByPk(MenuItemId);
+        const prepTime = prepTimeMap.get(MenuItemId) || 0;
 
-        if (menuItem) {
-          const prepTime = parseFloat(menuItem.preparationTime);
-
-          if (timeMap.has(MenuItemId)) {
-            const count = timeMap.get(MenuItemId).count + quantity;
-            const time = prepTime + (quantity - 1) * prepTime * bulkFactor;
-            timeMap.set(MenuItemId, { time, count });
-          } else {
-            timeMap.set(MenuItemId, { time: prepTime, count: quantity });
-          }
+        if (quantity >= bulkThreshold) {
+          totalPrepTime += (prepTime * quantity) / bulkFactor;
+        } else {
+          totalPrepTime += prepTime * quantity;
         }
       }
 
-      timeMap.forEach((value) => {
-        totalTime += value.time;
-      });
+      // Round estimated preparation time
+      const roundedPrepTime = Math.ceil(totalPrepTime);
 
-      return Math.ceil(totalTime);
+      // Calculate estimated delivery time
+      const estimatedDeliveryTime =
+        deliveryBaseTime + deliveryDistance * deliveryPerKm;
+
+      // Total estimated time (Preparation + Delivery)
+      const totalEstimatedTime = roundedPrepTime + estimatedDeliveryTime;
+
+      return {
+        preparationTime: roundedPrepTime,
+        deliveryTime: estimatedDeliveryTime,
+        totalTime: totalEstimatedTime,
+      };
     };
 
-    const estimatedPreparationTime = await calculateEstimatedTime(items);
+    // Calculate estimated time before creating order
+    const estimatedTimes = await calculateEstimatedTime(
+      items,
+      deliveryDistance
+    );
+    console.log("DATAAAAAAAAAAAAAAAAAAAa" + estimatedTimes.totalTime);
 
     // Create Order
     const order = await Order.create({
@@ -212,9 +218,10 @@ exports.createOrder = async (req, res) => {
       paymentMethod,
       discountAmount,
       taxAmount,
-      estimatedPreparationTime: estimatedPreparationTime.customerName,
+      estimatedDeliveryTime: estimatedTimes,
       TxnReferenceNumber: generateTxnReferenceNumber(),
       trackingNumber: generateTrackingNumber(),
+      customerName,
       customerContact,
       customerAddress,
       notes,
@@ -246,8 +253,9 @@ exports.createOrder = async (req, res) => {
       discountAmount,
       taxAmount,
       deliveryFee,
-      estimatedPreparationTime,
+      estimatedTimes,
       items,
+      customerName,
       requestInfo,
       performedBy,
     });
@@ -259,7 +267,7 @@ exports.createOrder = async (req, res) => {
         orderDate: new Date(order.createdAt).toLocaleDateString("en-GB"),
         status: order.status,
         trackingNumber: order.trackingNumber,
-        preparationTime: `${estimatedPreparationTime} minutes`,
+        preparationTime: `${estimatedTimes.preparationTime} minutes`,
         notes: order.notes,
         specialInstructions: order.specialInstructions,
       },
@@ -413,7 +421,12 @@ exports.getbyTxnData = async (req, res) => {
   try {
     const { TxnReferenceNumber } = req.body;
     const orders = await Order.findAll({
-      where: { TxnReferenceNumber },
+      where: {
+        [Op.or]: [
+          { TxnReferenceNumber: TxnReferenceNumber },
+          { trackingNumber: TxnReferenceNumber },
+        ],
+      },
       include: [
         { model: User.scope("basicInfo") },
         { model: Branch.scope("basicInfo") },
@@ -422,77 +435,86 @@ exports.getbyTxnData = async (req, res) => {
     });
 
     if (!orders.length) {
-      return res
-        .status(404)
-        .json({
-          error: "No orders found for the given transaction reference number.",
-        });
+      return res.status(404).json({
+        error: "No orders found for the given transaction reference number.",
+      });
     }
     const structuredOrders = formatOrderResponse(orders);
+    const currentStatus = getOrderStatusReport(
+      structuredOrders[0].orderDetails.estimatedDeliveryTime,
+      structuredOrders[0].orderDetails.createdAt,
+      structuredOrders[0].orderDetails.status
+    );
 
     res.json({
+      statusReport: currentStatus,
       orders: structuredOrders,
     });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
-
 exports.updateOrderStatus = async (req, res) => {
   try {
     const { id } = req.params;
+    const { action } = req.body;
+
+    if (!action) {
+      return res.status(400).json({ error: "Action is required" });
+    }
 
     const order = await Order.findByPk(id);
     if (!order) {
       return res.status(404).json({ error: "Order not found" });
     }
 
-    // Allow status update only if current status is 'pending'
-    if (order.status === "completed") {
-      return res.status(400).json({ error: "This Order is Already delivered" });
-    }
-    if (order.status === "cancelled") {
-      return res.status(400).json({ error: "This Order is Already Cancelled" });
-    }
+    if (action === "complete") {
+      if (order.status === "completed") {
+        return res
+          .status(400)
+          .json({ error: "This Order is Already delivered" });
+      }
+      if (order.status === "cancelled") {
+        return res
+          .status(400)
+          .json({ error: "This Order is Already Cancelled" });
+      }
 
-    // Update order status to 'completed'
-    order.status = "completed";
-    await order.save();
+      order.status = "completed";
+      order.paymentStatus = "paid";
+      order.completedAt = moment()
+        .tz("Asia/Kolkata")
+        .format("YYYY-MM-DD HH:mm:ss"); 
+      await order.save();
 
-    res.json({
-      message: "Order status updated to completed successfully",
-      order,
-    });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
-
-exports.cancelOrder = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const order = await Order.findByPk(id);
-    if (!order) {
-      return res.status(404).json({ error: "Order not found" });
-    }
-
-    // Check if the order is cancellable (e.g., not already delivered or completed)
-    if (order.status === "delivered" || order.status === "completed") {
-      return res.status(400).json({
-        error:
-          "Cannot cancel order that has already been delivered or completed",
+      return res.json({
+        message: "Order status updated to completed successfully",
+        order,
       });
     }
-    if (order.status === "cancelled") {
-      return res.status(400).json({ error: "Order already cancelled" });
+
+    if (action === "cancel") {
+      if (order.status === "delivered" || order.status === "completed") {
+        return res.status(400).json({
+          error:
+            "Cannot cancel order that has already been delivered or completed",
+        });
+      }
+      if (order.status === "cancelled") {
+        return res.status(400).json({ error: "Order already cancelled" });
+      }
+
+      order.status = "cancelled";
+      order.cancelledAt = moment()
+        .tz("Asia/Kolkata")
+        .format("YYYY-MM-DD HH:mm:ss"); 
+      order.paymentStatus = "cancelled";
+      await order.save();
+
+      return res.json({ message: "Order cancelled successfully", order });
     }
 
-    // Update order status to cancelled
-    order.status = "cancelled";
-    await order.save();
-
-    res.json({ message: "Order cancelled successfully", order });
+    return res.status(400).json({ error: "Invalid action | Please select complete or cancel" });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -508,5 +530,180 @@ exports.deleteOrder = async (req, res) => {
     res.json({ message: "Order deleted successfully" });
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+};
+
+//Utility Functions
+cron.schedule("* * * * *", () => {
+  console.log("⏳ Running order status update...");
+  updateOrderStatuses();
+});
+function formatDate() {
+  const now = new Date();
+  const day = String(now.getDate()).padStart(2, "0");
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const year = String(now.getFullYear()).slice(-2);
+
+  return `${day}${month}${year}`;
+}
+function generateTxnReferenceNumber() {
+  const datePart = formatDate();
+  const randomPart = crypto.randomBytes(4).toString("hex");
+  return `TXN-${datePart}-${randomPart}`;
+}
+function generateTrackingNumber() {
+  const datePart = formatDate();
+  const randomPart = crypto.randomBytes(4).toString("hex");
+  return `TRK-${datePart}-${randomPart}`;
+}
+
+const getOrderStatusReport = (estimatedDeliveryTime, createdAt,curStatus) => {
+  if (!estimatedDeliveryTime || !createdAt) {
+    return {
+      currentStatus: "Unknown",
+      nextStage: "N/A",
+      expectedDeliveryTime: "N/A",
+    };
+  }
+  if(curStatus === "cancelled" || curStatus === "completed"){
+    return {
+      currentStatus: curStatus,
+      nextStage: "N/A",
+      expectedDeliveryTime: "N/A",
+    };
+  }
+
+  const { preparationTime, deliveryTime, totalTime } = estimatedDeliveryTime;
+
+  const orderCreatedAt = moment(createdAt, "D/M/YYYY, h:mm:ss a", true).tz(
+    "Asia/Kolkata"
+  );
+
+  if (!orderCreatedAt.isValid()) {
+    console.error("❌ Invalid createdAt date:", createdAt);
+    return {
+      currentStatus: "Unknown",
+      nextStage: "N/A",
+      expectedDeliveryTime: "N/A",
+    };
+  }
+
+  // Calculate elapsed time in minutes
+  const elapsedMinutes = Math.floor(
+    moment().tz("Asia/Kolkata").diff(orderCreatedAt, "minutes")
+  );
+
+  let status = "Delivered";
+  let nextStage = "Order already delivered";
+  let remainingTime = 0;
+
+  if (elapsedMinutes < preparationTime) {
+    status = "Preparing";
+    remainingTime = preparationTime - elapsedMinutes;
+    nextStage = "Out for delivery soon";
+  } else if (elapsedMinutes < totalTime) {
+    status = "On the way";
+    remainingTime = totalTime - elapsedMinutes;
+    nextStage = "Will be delivered soon";
+  }
+
+  // Calculate expected delivery time
+  const expectedDeliveryTime = orderCreatedAt
+    .add(totalTime, "minutes")
+    .format("h:mm A");
+
+  // Format remaining time
+  const formattedRemainingTime =
+    remainingTime > 60
+      ? `${Math.floor(remainingTime / 60)} hr ${remainingTime % 60} min`
+      : `${remainingTime} min`;
+
+  return {
+    currentStatus: `${status} (${formattedRemainingTime} remaining)`,
+    nextStage,
+    expectedDeliveryTime,
+  };
+};
+const updateOrderStatuses = async () => {
+  try {
+    // Fetch all orders that are still active (not delivered or canceled)
+    const orders = await Order.findAll({
+      where: {
+        status: { [Op.in]: ["pending", "preparing", "on the way"] },
+      },
+    });
+
+    const currentTime = moment().tz("Asia/Kolkata");
+
+    let updates = [];
+
+    for (const order of orders) {
+      let { estimatedDeliveryTime, createdAt, paymentStatus, status } = order;
+
+      if (!estimatedDeliveryTime) continue;
+
+      if (typeof estimatedDeliveryTime === "string") {
+        try {
+          estimatedDeliveryTime = JSON.parse(estimatedDeliveryTime);
+        } catch (err) {
+          console.error(
+            `❌ Error parsing estimatedDeliveryTime for Order ${order.id}:`,
+            err
+          );
+          continue;
+        }
+      }
+
+      const { preparationTime, totalTime } = estimatedDeliveryTime;
+      const orderCreatedTime = moment(createdAt).tz("Asia/Kolkata");
+      const elapsedMinutes = currentTime.diff(orderCreatedTime, "minutes");
+
+      let newStatus = status;
+      let newPaymentStatus = paymentStatus;
+      let completedAt = null;
+
+      if (elapsedMinutes >= totalTime) {
+        newStatus = "delivered";
+        completedAt = currentTime.format("YYYY-MM-DD HH:mm:ss");
+        if (paymentStatus === "unpaid") {
+          newPaymentStatus = "paid"; // Update payment status if the order is delivered
+        }
+      } else if (elapsedMinutes >= preparationTime) {
+        newStatus = "on the way";
+      } else {
+        newStatus = "preparing";
+      }
+
+      if (
+        newStatus !== status ||
+        newPaymentStatus !== paymentStatus ||
+        completedAt
+      ) {
+        updates.push({
+          id: order.id,
+          status: newStatus,
+          paymentStatus: newPaymentStatus,
+          completedAt: completedAt,
+        });
+      }
+    }
+
+    if (updates.length > 0) {
+      for (const update of updates) {
+        await Order.update(
+          {
+            status: update.status,
+            paymentStatus: update.paymentStatus,
+            completedAt: update.completedAt,
+          },
+          { where: { id: update.id } }
+        );
+        console.log(
+          `✅ Order ${update.id} updated to ${update.status}, Payment Status: ${update.paymentStatus}, Completed At: ${update.completedAt}`
+        );
+      }
+    }
+  } catch (error) {
+    console.error("❌ Error updating order statuses:", error);
   }
 };

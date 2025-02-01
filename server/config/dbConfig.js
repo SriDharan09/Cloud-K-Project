@@ -2,6 +2,6 @@ module.exports = {
   HOST: "localhost",
   USER: "root",
   PASSWORD: "1234",
-  DB: "Cloud-K Project",
+  DB: "cloud-k project",
   dialect: "mysql",
 };

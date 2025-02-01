@@ -8,7 +8,6 @@ const {
   getFilteredOrder,
   updateOrderStatus,
   deleteOrder,
-  cancelOrder,
 } = require("../controllers/orderController");
 const authMiddleware = require("../middleware/auth");
 
@@ -18,7 +17,6 @@ router.get("/getByTxnNum", authMiddleware, getbyTxnData); // Specific route
 router.get("/getFilteredOrder", authMiddleware, getFilteredOrder); // Specific route
 router.get("/", authMiddleware, getOrders);
 router.get("/:id", authMiddleware, getOrderById); // General route (placed last)
-router.put("/:id/cancel", authMiddleware, cancelOrder);
 router.put("/:id/status", authMiddleware, updateOrderStatus);
 router.delete("/:id", authMiddleware, deleteOrder);
 

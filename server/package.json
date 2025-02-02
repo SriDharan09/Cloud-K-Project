@@ -14,6 +14,8 @@
     "mysql2": "^3.10.0",
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.14",
+    "pdfkit": "^0.16.0",
+    "pdfkit-table": "^0.1.99",
     "sequelize": "^6.37.5",
     "winston": "^3.14.2",
     "winston-daily-rotate-file": "^5.0.0"

@@ -13,6 +13,8 @@ const { log } = require("console");
 const { Op } = require("sequelize");
 const moment = require("moment-timezone");
 const cron = require("node-cron");
+const PDFDocument = require("pdfkit-table");
+const fs = require("fs");
 const orderAttributes = [
   "id",
   "total_price",
@@ -443,7 +445,9 @@ exports.getbyTxnData = async (req, res) => {
     const currentStatus = getOrderStatusReport(
       structuredOrders[0].orderDetails.estimatedDeliveryTime,
       structuredOrders[0].orderDetails.createdAt,
-      structuredOrders[0].orderDetails.status
+      structuredOrders[0].orderDetails.status,
+      structuredOrders[0].orderDetails.cancelledAt,
+      structuredOrders[0].orderDetails.completedAt
     );
 
     res.json({
@@ -484,7 +488,7 @@ exports.updateOrderStatus = async (req, res) => {
       order.paymentStatus = "paid";
       order.completedAt = moment()
         .tz("Asia/Kolkata")
-        .format("YYYY-MM-DD HH:mm:ss"); 
+        .format("YYYY-MM-DD HH:mm:ss");
       await order.save();
 
       return res.json({
@@ -507,14 +511,16 @@ exports.updateOrderStatus = async (req, res) => {
       order.status = "cancelled";
       order.cancelledAt = moment()
         .tz("Asia/Kolkata")
-        .format("YYYY-MM-DD HH:mm:ss"); 
+        .format("YYYY-MM-DD HH:mm:ss");
       order.paymentStatus = "cancelled";
       await order.save();
 
       return res.json({ message: "Order cancelled successfully", order });
     }
 
-    return res.status(400).json({ error: "Invalid action | Please select complete or cancel" });
+    return res
+      .status(400)
+      .json({ error: "Invalid action | Please select complete or cancel" });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -530,6 +536,200 @@ exports.deleteOrder = async (req, res) => {
     res.json({ message: "Order deleted successfully" });
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+};
+
+exports.statusReportPDF = async (req, res) => {
+  try {
+    const { startDate, endDate, filterType } = req.query;
+
+    if (!startDate || !endDate) {
+      return res
+        .status(400)
+        .json({ error: "Start date and end date are required." });
+    }
+
+    const start = moment(startDate).startOf("day").tz("Asia/Kolkata").format();
+    const end = moment(endDate).endOf("day").tz("Asia/Kolkata").format();
+
+    let whereCondition = { orderDate: { [Op.between]: [start, end] } };
+    let expectedDeliveryLabel = "Expected Delivery At";
+    switch (filterType) {
+      case "pending":
+        whereCondition.status = {
+          [Op.in]: ["pending", "preparing", "on the way"],
+        };
+        expectedDeliveryLabel = "Expected delivery At";
+        break;
+      case "on_the_way":
+        whereCondition.status = "on the way";
+        break;
+      case "completed":
+        whereCondition.status = "completed";
+        expectedDeliveryLabel = "Completed At";
+        break;
+      case "cancelled":
+        whereCondition.status = "cancelled";
+        expectedDeliveryLabel = "Cancelled At";
+        break;
+      case "not_delivered":
+        whereCondition.status = {
+          [Op.ne]: "delivered", 
+          [Op.notIn]: ["cancelled", "completed"], 
+        };
+        break;
+      case "delivered":
+        expectedDeliveryLabel = "Delivered At";
+        whereCondition.status = "delivered";
+        break;
+      case "all":
+        expectedDeliveryLabel = "Delivered / Cancelled / Completed At";
+      default:
+        break;
+    }
+
+    const orders = await Order.findAll({ where: whereCondition });
+
+    if (!orders.length) {
+      return res.status(404).json({
+        error: `No ${filterType} orders found for the given date range.`,
+      });
+    }
+
+    const doc = new PDFDocument({
+      margin: 20,
+      size: "A4",
+      layout: "landscape",
+    }); // Landscape mode to fit more columns
+    let buffers = [];
+
+    doc.on("data", buffers.push.bind(buffers));
+    doc.on("end", () => {
+      const pdfData = Buffer.concat(buffers);
+      const base64PDF = pdfData.toString("base64");
+      res.json({ base64: base64PDF });
+    });
+
+    doc.fontSize(18).text(`Order Report (${filterType.replace("_", " ")})`, {
+      align: "center",
+      bold: true,
+    });
+    doc.moveDown(2);
+
+    var tableData = {
+      headers: [
+        {
+          label: "Txn Ref No",
+          property: "TxnReferenceNumber",
+          width: 80,
+          align: "center",
+        },
+        {
+          label: "Price",
+          property: "total_price",
+          width: 70,
+          align: "center",
+        },
+        { label: "Status", property: "status", width: 80, align: "center" },
+        {
+          label: "Payment Method",
+          property: "paymentMethod",
+          width: 80,
+          align: "center",
+        },
+        {
+          label: "Payment Status",
+          property: "paymentStatus",
+          width: 80,
+          align: "center",
+        },
+        {
+          label: "Current Status",
+          property: "currentStatus",
+          width: 120,
+          align: "center",
+        },
+        {
+          label: "Next Stage",
+          property: "nextStage",
+          width: 120,
+          align: "center",
+        },
+        {
+          label: expectedDeliveryLabel,
+          property: "expectedDeliveryTime",
+          width: 100,
+          align: "center",
+        }, // Dynamic label
+      ],
+      datas: orders.map((order) => {
+        const {
+          total_price,
+          status,
+          TxnReferenceNumber,
+          paymentMethod,
+          paymentStatus,
+          createdAt,
+          estimatedDeliveryTime,
+          cancelledAt,
+          completedAt,
+        } = order;
+        const estimatedTime =
+          typeof estimatedDeliveryTime === "string"
+            ? JSON.parse(estimatedDeliveryTime)
+            : estimatedDeliveryTime;
+        const statusReport = getOrderStatusReport(
+          estimatedTime,
+          createdAt,
+          status,
+          cancelledAt,
+          completedAt
+        );
+
+        let expectedDeliveryValue = statusReport.expectedDeliveryTime;
+
+        if (status === "cancelled") {
+          expectedDeliveryValue = cancelledAt
+            ? moment(cancelledAt, "D/M/YYYY, h:mm:ss a", true)
+                .tz("Asia/Kolkata")
+                .format("D MMMM YYYY, h:mm A")
+            : "N/A";
+        } else if (status === "completed") {
+          expectedDeliveryValue = completedAt
+            ? moment(completedAt, "D/M/YYYY, h:mm:ss a", true)
+                .tz("Asia/Kolkata")
+                .format("D MMMM YYYY, h:mm A")
+            : "N/A";
+        }
+
+        return {
+          TxnReferenceNumber,
+          total_price: `${total_price}`,
+          status,
+          paymentMethod,
+          paymentStatus,
+          currentStatus: statusReport.currentStatus,
+          nextStage: statusReport.nextStage,
+          expectedDeliveryTime: expectedDeliveryValue, // Dynamic property
+        };
+      }),
+    };
+    const filteredData = tableData.datas.map(
+      ({ status, paymentStatus, paymentMethod, ...rest }) => rest
+    );
+    console.table(filteredData);
+
+    await doc.table(tableData, {
+      prepareHeader: () => doc.font("Helvetica-Bold").fontSize(12),
+      prepareRow: (row, index) => doc.font("Helvetica").fontSize(10),
+      columnSpacing: 5, // Reduce space between columns to fit more
+      width: 750, // Ensures it fits in landscape mode
+    });
+
+    doc.end();
+  } catch (error) {
+    console.error("❌ Error generating order report:", error);
+    res.status(500).json({ error: "Internal server error." });
   }
 };
 
@@ -557,7 +757,13 @@ function generateTrackingNumber() {
   return `TRK-${datePart}-${randomPart}`;
 }
 
-const getOrderStatusReport = (estimatedDeliveryTime, createdAt,curStatus) => {
+const getOrderStatusReport = (
+  estimatedDeliveryTime,
+  createdAt,
+  curStatus,
+  cancelTime,
+  completeTime
+) => {
   if (!estimatedDeliveryTime || !createdAt) {
     return {
       currentStatus: "Unknown",
@@ -565,12 +771,30 @@ const getOrderStatusReport = (estimatedDeliveryTime, createdAt,curStatus) => {
       expectedDeliveryTime: "N/A",
     };
   }
-  if(curStatus === "cancelled" || curStatus === "completed"){
-    return {
-      currentStatus: curStatus,
-      nextStage: "N/A",
-      expectedDeliveryTime: "N/A",
-    };
+  if (curStatus === "cancelled" || curStatus === "completed") {
+    const formattedCancelTime = cancelTime
+      ? moment(cancelTime, "D/M/YYYY, h:mm:ss a", true)
+          .tz("Asia/Kolkata")
+          .format("D MMMM YYYY, h:mm A")
+      : "N/A";
+    const formattedCompleteTime = completeTime
+      ? moment(completeTime, "D/M/YYYY, h:mm:ss a", true)
+          .tz("Asia/Kolkata")
+          .format("D MMMM YYYY, h:mm A")
+      : "N/A";
+    if (curStatus.includes("cancel")) {
+      return {
+        currentStatus: curStatus,
+        nextStage: "N/A",
+        cancelledAt: formattedCancelTime,
+      };
+    } else if (curStatus.includes("complete")) {
+      return {
+        currentStatus: curStatus,
+        nextStage: "N/A",
+        completedAt: formattedCompleteTime,
+      };
+    }
   }
 
   const { preparationTime, deliveryTime, totalTime } = estimatedDeliveryTime;
@@ -619,7 +843,10 @@ const getOrderStatusReport = (estimatedDeliveryTime, createdAt,curStatus) => {
       : `${remainingTime} min`;
 
   return {
-    currentStatus: `${status} (${formattedRemainingTime} remaining)`,
+    currentStatus:
+      formattedRemainingTime === "0 min"
+        ? status
+        : `${status} (${formattedRemainingTime} remaining)`,
     nextStage,
     expectedDeliveryTime,
   };

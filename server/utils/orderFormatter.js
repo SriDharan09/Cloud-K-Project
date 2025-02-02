@@ -12,6 +12,8 @@ const formatOrderResponse = (orders) => {
         taxAmount: parseFloat(order.taxAmount).toFixed(2),
         trackingNumber: order.trackingNumber,
         estimatedDeliveryTime: order.estimatedDeliveryTime,
+        cancelledAt: new Date(order.cancelledAt).toLocaleString(),
+        completedAt: new Date(order.completedAt).toLocaleString(),
         createdAt: new Date(order.createdAt).toLocaleString(),
         updatedAt: new Date(order.updatedAt).toLocaleString(),
       },

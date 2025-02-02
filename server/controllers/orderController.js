@@ -5,6 +5,7 @@ const {
   User,
   Branch,
   Offer,
+  Review,
 } = require("../models");
 const orderLogger = require("../utils/logger/ordersLogger");
 const crypto = require("crypto");
@@ -143,10 +144,27 @@ exports.createOrder = async (req, res) => {
           { requestInfo, performedBy }
         );
         return res.status(400).json({
-          error:
-            "Order does not meet the minimum amount required for the offer",
+          error: `Order does not meet the minimum amount required for the offer.\nMin order amount: ${offer.min_order_amount}\nYour cart worth is ${totalPriceWithoutDiscount}`,
         });
       }
+      if (offer.redeemable === false) {
+        if (
+          offer.redeem_limit !== null &&
+          offer.redeemed_count >= offer.redeem_limit
+        ) {
+          orderLogger.error("Redemption limit reached for the offer", {
+            requestInfo,
+            performedBy,
+          });
+          return res
+            .status(400)
+            .json({ error: "Redemption limit reached for the offer" });
+        }
+      }
+
+      await offer.update({
+        redeemed_count: offer.redeemed_count + 1,
+      });
 
       discountAmount =
         (offer.discount_percentage / 100) * totalPriceWithoutDiscount;
@@ -162,7 +180,7 @@ exports.createOrder = async (req, res) => {
     const calculateEstimatedTime = async (items, deliveryDistance = 5) => {
       let totalPrepTime = 0;
       const bulkFactor = 6.32;
-      const bulkThreshold = 3;
+      const bulkThreshold = 2;
       const deliveryBaseTime = 5; // Base delivery time in minutes
       const deliveryPerKm = 2; // Additional time per km
 
@@ -209,7 +227,6 @@ exports.createOrder = async (req, res) => {
       items,
       deliveryDistance
     );
-    console.log("DATAAAAAAAAAAAAAAAAAAAa" + estimatedTimes.totalTime);
 
     // Create Order
     const order = await Order.create({
@@ -228,6 +245,7 @@ exports.createOrder = async (req, res) => {
       customerAddress,
       notes,
       specialInstructions,
+      redeemCodeUsed: offerId,
       orderBy: performedBy,
     });
 
@@ -539,6 +557,162 @@ exports.deleteOrder = async (req, res) => {
   }
 };
 
+exports.rateFood = async (req, res) => {
+  try {
+    const userCifId = req.user.userCIFId;
+    const {
+      orderId,
+      overallRating,
+      ratings,
+      WholeRating,
+      comment,
+      orderComment,
+      suggestion,
+      complaints,
+    } = req.body;
+
+    const orderItems = await OrderItem.findAll({
+      where: { OrderId: orderId },
+      include: [{ model: MenuItem, attributes: ["id", "name"] }],
+    });
+
+    if (!orderItems.length) {
+      return res.status(404).json({ error: "Order not found or has no items" });
+    }
+
+    const order = await Order.findByPk(orderId);
+    if (!order || order.status !== "delivered") {
+      return res
+        .status(400)
+        .json({ error: "Reviews can only be added for delivered orders" });
+    }
+
+    if (order.orderBy !== userCifId) {
+      return res
+        .status(403)
+        .json({ error: "You can only review orders placed by you" });
+    }
+    const existingReview = await Review.findOne({
+      where: { orderId, reviewPostedBy: userCifId },
+    });
+
+    if (existingReview) {
+      return res
+        .status(400)
+        .json({ error: "You have already reviewed this order" });
+    }
+
+    if (WholeRating) {
+      if (overallRating) {
+        if (overallRating < 1 || overallRating > 5) {
+          return res
+            .status(400)
+            .json({ error: "Overall rating must be between 1 and 5." });
+        }
+
+        for (const item of orderItems) {
+          const existingReview = await Review.findOne({
+            where: {
+              orderId,
+              MenuItemId: item.MenuItemId,
+              reviewPostedBy: userCifId,
+            },
+          });
+
+          if (!existingReview) {
+            await Review.create({
+              rating: overallRating,
+              orderId,
+              comment,
+              orderComment,
+              suggestion,
+              complaints,
+              MenuItemId: item.MenuItemId,
+              reviewPostedBy: userCifId,
+            });
+
+            await updateMenuItemRating(item.MenuItemId);
+          }
+        }
+
+        return res.json({
+          message: "All menu items have been rated with the overall rating.",
+        });
+      } else {
+        return res
+          .status(400)
+          .json({ error: "Overall rating must be provided." });
+      }
+    }
+
+    if (ratings && Array.isArray(ratings)) {
+      for (let i = 0; i < ratings.length; i++) {
+        const { MenuItemId, rating, comment, suggestion, complaints } =
+          ratings[i];
+
+        const orderItem = orderItems.find(
+          (item) => item.MenuItemId === MenuItemId
+        );
+        if (!orderItem) {
+          continue; 
+        }
+
+        const existingReview = await Review.findOne({
+          where: { orderId, MenuItemId, reviewPostedBy: userCifId },
+        });
+
+        if (existingReview) {
+          await existingReview.update({
+            rating,
+            comment,
+            suggestion,
+            complaints,
+          });
+        } else {
+          await Review.create({
+            rating,
+            comment,
+            suggestion,
+            complaints,
+            orderId,
+            orderComment,
+            MenuItemId,
+            reviewPostedBy: userCifId,
+          });
+        }
+
+        await updateMenuItemRating(MenuItemId);
+      }
+
+      return res.json({
+        message: "Ratings for menu items have been updated successfully.",
+      });
+    }
+
+    return res.status(400).json({ error: "No rating data provided." });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error: error.message });
+  }
+};
+
+// Function to update the MenuItem rating based on reviews
+const updateMenuItemRating = async (MenuItemId) => {
+  const allReviews = await Review.findAll({
+    where: { MenuItemId },
+  });
+
+  if (allReviews.length > 0) {
+    const averageRating =
+      allReviews.reduce((acc, review) => acc + review.rating, 0) /
+      allReviews.length;
+
+    const menuItem = await MenuItem.findByPk(MenuItemId);
+    menuItem.rating = averageRating;
+    await menuItem.save();
+  }
+};
+
 exports.statusReportPDF = async (req, res) => {
   try {
     const { startDate, endDate, filterType } = req.query;
@@ -574,8 +748,8 @@ exports.statusReportPDF = async (req, res) => {
         break;
       case "not_delivered":
         whereCondition.status = {
-          [Op.ne]: "delivered", 
-          [Op.notIn]: ["cancelled", "completed"], 
+          [Op.ne]: "delivered",
+          [Op.notIn]: ["cancelled", "completed"],
         };
         break;
       case "delivered":

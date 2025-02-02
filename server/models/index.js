@@ -22,19 +22,19 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-db.User = require('./user')(sequelize, DataTypes);
-db.Role = require('./role')(sequelize, DataTypes);
-db.Branch = require('./branch')(sequelize, DataTypes);
-db.Category = require('./category')(sequelize, DataTypes);
-db.MenuItem = require('./menuItem')(sequelize, DataTypes);
-db.Order = require('./order')(sequelize, DataTypes);
-db.OrderItem = require('./orderItem')(sequelize, DataTypes);
-db.Review = require('./review')(sequelize, DataTypes);
-db.DeliveryPersonnel = require('./deliveryPersonnel')(sequelize, DataTypes);
-db.Offer = require('./offer')(sequelize, DataTypes);
-db.UserAddress = require('./userAddress')(sequelize, DataTypes);
-db.Customization = require('./customization')(sequelize, DataTypes);
-db.AuditLog = require('./auditLog')(sequelize, DataTypes);
+db.User = require("./user")(sequelize, DataTypes);
+db.Role = require("./role")(sequelize, DataTypes);
+db.Branch = require("./branch")(sequelize, DataTypes);
+db.Category = require("./category")(sequelize, DataTypes);
+db.MenuItem = require("./menuItem")(sequelize, DataTypes);
+db.Order = require("./order")(sequelize, DataTypes);
+db.OrderItem = require("./orderItem")(sequelize, DataTypes);
+db.Review = require("./review")(sequelize, DataTypes);
+db.DeliveryPersonnel = require("./deliveryPersonnel")(sequelize, DataTypes);
+db.Offer = require("./offer")(sequelize, DataTypes);
+db.UserAddress = require("./userAddress")(sequelize, DataTypes);
+db.Customization = require("./customization")(sequelize, DataTypes);
+db.AuditLog = require("./auditLog")(sequelize, DataTypes);
 
 db.Role.hasMany(db.User);
 db.User.belongsTo(db.Role);
@@ -66,46 +66,47 @@ db.Review.belongsTo(db.MenuItem);
 db.User.hasMany(db.UserAddress);
 db.UserAddress.belongsTo(db.User);
 
+// To clear the data from the table :
+
 // resetDatabase();
 // truncateTable();
 
 async function resetDatabase() {
   try {
     // Disable foreign key checks
-    await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
-    console.log('Foreign key checks disabled.');
+    await sequelize.query("SET FOREIGN_KEY_CHECKS = 0");
+    console.log("Foreign key checks disabled.");
 
     // Drop tables
-    await sequelize.query('DROP TABLE IF EXISTS Branch');
-    console.log('Tables dropped successfully.');
+    await sequelize.query("DROP TABLE IF EXISTS Branch");
+    console.log("Tables dropped successfully.");
 
     // Re-enable foreign key checks
-    await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
-    console.log('Foreign key checks re-enabled.');
-
+    await sequelize.query("SET FOREIGN_KEY_CHECKS = 1");
+    console.log("Foreign key checks re-enabled.");
   } catch (error) {
-    console.error('Error during database reset:', error);
+    console.error("Error during database reset:", error);
   }
 }
 async function truncateTable() {
   try {
     // Disable foreign key checks
-    await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
-    console.log('Foreign key checks disabled.');
+    await sequelize.query("SET FOREIGN_KEY_CHECKS = 0");
+    console.log("Foreign key checks disabled.");
 
     // Define the order to truncate tables, ensuring no foreign key constraints are violated
     const truncateOrder = [
-      'OrderItems',     // Child of Orders and MenuItems
-      'Reviews',        // Child of Users and MenuItems
-      'Orders',         // Parent of OrderItems, Child of Branches and Users
-      'UserAddresses',  // Child of Users
-      'MenuItems',      // Parent of OrderItems, Child of Branches and Categories
-      'Users',          // Parent of Orders, UserAddresses, and Reviews; Child of Roles
-      'Branches',       // Parent of Orders and MenuItems
-      'Categories',     // Parent of MenuItems
-      'Roles',          // Parent of Users
-      'Customizations', // Not referenced by any other table
-      'AuditLogs'       // Not referenced by any other table
+      "OrderItems", // Child of Orders and MenuItems
+      "Reviews", // Child of Users and MenuItems
+      "Orders", // Parent of OrderItems, Child of Branches and Users
+      "UserAddresses", // Child of Users
+      "MenuItems", // Parent of OrderItems, Child of Branches and Categories
+      "Users", // Parent of Orders, UserAddresses, and Reviews; Child of Roles
+      "Branches", // Parent of Orders and MenuItems
+      "Categories", // Parent of MenuItems
+      "Roles", // Parent of Users
+      "Customizations", // Not referenced by any other table
+      "AuditLogs", // Not referenced by any other table
     ];
 
     // Truncate tables in defined order
@@ -115,14 +116,14 @@ async function truncateTable() {
     }
 
     // Re-enable foreign key checks
-    await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
-    console.log('Foreign key checks re-enabled.');
-
+    await sequelize.query("SET FOREIGN_KEY_CHECKS = 1");
+    console.log("Foreign key checks re-enabled.");
   } catch (error) {
-    console.error('Error during database reset:', error);
+    console.error("Error during database reset:", error);
   }
 }
 
+//If table data altered use this:
 
 // sequelize.sync({ alter: true })
 //   .then(() => {
@@ -132,24 +133,22 @@ async function truncateTable() {
 //     console.error('Error updating database schema:', error);
 //   });
 
+db.sequelize.sync({ force: false }).then(() => {
+  console.log("Re-sync Done ");
+});
 
-db.sequelize.sync({force :  false})
-  .then(()=>{
-      console.log("Re-sync Done ");
-  })
-
-  // sequelize.query('SET FOREIGN_KEY_CHECKS = 0') // Disable foreign key checks
-  // .then(() => {
-  //   return sequelize.query('Drop TABLE Users'); // Truncate the table
-  // })
-  // .then(() => {
-  //   return sequelize.query('SET FOREIGN_KEY_CHECKS = 1'); // Re-enable foreign key checks
-  // })
-  // .then(() => {
-  //   console.log('Data truncated successfully.');
-  // })
-  // .catch(error => {
-  //   console.error('Error truncating data:', error);
-  // });
+// sequelize.query('SET FOREIGN_KEY_CHECKS = 0') // Disable foreign key checks
+// .then(() => {
+//   return sequelize.query('Drop TABLE Users'); // Truncate the table
+// })
+// .then(() => {
+//   return sequelize.query('SET FOREIGN_KEY_CHECKS = 1'); // Re-enable foreign key checks
+// })
+// .then(() => {
+//   console.log('Data truncated successfully.');
+// })
+// .catch(error => {
+//   console.error('Error truncating data:', error);
+// });
 
 module.exports = db;

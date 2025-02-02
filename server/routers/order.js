@@ -9,11 +9,13 @@ const {
   updateOrderStatus,
   deleteOrder,
   statusReportPDF,
+  rateFood
 } = require("../controllers/orderController");
 const authMiddleware = require("../middleware/auth");
 
 // Define specific routes before general ones
 router.post("/", authMiddleware, createOrder);
+router.post("/rate", authMiddleware, rateFood);
 router.get("/getByTxnNum", authMiddleware, getbyTxnData); // Specific route
 router.get("/getFilteredOrder", authMiddleware, getFilteredOrder); // Specific route
 router.get("/", authMiddleware, getOrders);

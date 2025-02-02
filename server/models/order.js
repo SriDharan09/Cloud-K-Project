@@ -101,6 +101,14 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
+      redeemCodeUsed: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      reviewId:{
+        type: DataTypes.INTEGER,
+        allowNull: true
+      }
     },
     {
       scopes: {

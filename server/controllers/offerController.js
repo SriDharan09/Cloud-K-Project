@@ -3,7 +3,7 @@ const { Offer } = require('../models');
 // Create an offer
 exports.createOffer = async (req, res) => {
   try {
-    const { name, description, discount_percentage, valid_from, valid_to, min_order_amount } = req.body;
+    const { name, description, discount_percentage, valid_from, valid_to, min_order_amount,redeemable, redeem_limit } = req.body;
 
     const newOffer = await Offer.create({
       name,
@@ -11,7 +11,9 @@ exports.createOffer = async (req, res) => {
       discount_percentage,
       valid_from,
       valid_to,
-      min_order_amount
+      min_order_amount,
+      redeemable,
+      redeem_limit
     });
 
     res.json(newOffer);
@@ -24,7 +26,7 @@ exports.createOffer = async (req, res) => {
 exports.updateOffer = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, description, discount_percentage, valid_from, valid_to, min_order_amount } = req.body;
+    const { name, description, discount_percentage, valid_from, valid_to, min_order_amount,redeem_limit,redeemable} = req.body;
 
     const offer = await Offer.findByPk(id);
     if (!offer) {
@@ -37,6 +39,8 @@ exports.updateOffer = async (req, res) => {
     offer.valid_from = valid_from;
     offer.valid_to = valid_to;
     offer.min_order_amount = min_order_amount;
+    offer.redeem_limit = redeem_limit;
+    offer.redeemable = redeemable;
 
     await offer.save();
 

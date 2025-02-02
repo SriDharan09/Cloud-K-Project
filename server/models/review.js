@@ -11,6 +11,23 @@ module.exports = (sequelize, DataTypes) => {
       comment: {
         type: DataTypes.TEXT,
       },
+      orderId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      orderComment:{
+        type : DataTypes.TEXT,
+      },
+      suggestion: {
+        type: DataTypes.TEXT,
+      },
+      complaints: {
+        type: DataTypes.TEXT,
+      },
+      reviewPostedBy: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
     });
   
     return Review;

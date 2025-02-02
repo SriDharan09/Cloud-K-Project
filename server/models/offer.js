@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const Offer = sequelize.define('Offer', {
+  const Offer = sequelize.define("Offer", {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -18,8 +18,21 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
     },
     min_order_amount: {
-      type: DataTypes.DECIMAL(10, 2), 
+      type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
+    },
+    redeemable: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
+    redeem_limit: {
+      type: DataTypes.INTEGER,
+      defaultValue: null,
+    },
+    redeemed_count: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
     },
   });
 

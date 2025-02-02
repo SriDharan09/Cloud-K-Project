@@ -5,6 +5,8 @@ const logger = require("../utils/logger/authLogger");
 const getRequestInfo = require("../utils/getRequestInfo");
 const validatePassword = require("../utils/validatePassword");
 const sendEmail = require("../utils/sendEmail");
+const moment = require("moment-timezone");
+
 const {
   generateEmailTemplate,
   generatePasswordResetTemplate,
@@ -272,15 +274,23 @@ exports.login = async (req, res) => {
       });
       return res.status(response.status).json(response);
     }
-
+    console.log(new Date() - new Date(user.lastLoginAttempt) < 30 * 60 * 1000);
     if (
       user.loginAttempts >= 5 &&
       new Date() - new Date(user.lastLoginAttempt) < 30 * 60 * 1000
     ) {
-      const response = {
-        status: 403,
-        error: "Account locked. Try again later.",
-      };
+      const lockDuration = 30 * 60 * 1000; // 30 minutes in milliseconds
+      const lastAttemptTime = new Date(user.lastLoginAttempt);
+      const unlockTime = new Date(lastAttemptTime.getTime() + lockDuration);
+      const formattedUnlockTime = moment(unlockTime)
+      .tz("Asia/Kolkata")
+      .format("YYYY-MM-DD HH:mm:ss");
+    
+    const response = {
+      status: 403,
+      error: "Account locked for 30 mins. Try again later.",
+      unlocksAt: formattedUnlockTime, // Now in IST format
+    };
       logger.warn("Account locked due to multiple failed login attempts", {
         email,
         req: requestInfo,
@@ -405,9 +415,8 @@ exports.resetPassword = async (req, res) => {
   try {
     logger.info("Password reset attempt", { req: requestInfo });
 
-    const {newPassword, email } = req.body;
+    const { newPassword, email } = req.body;
     const { atoken } = req.params;
-
 
     logger.debug("Received reset token and newPassword", {
       token: atoken,

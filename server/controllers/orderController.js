@@ -654,7 +654,7 @@ exports.rateFood = async (req, res) => {
           (item) => item.MenuItemId === MenuItemId
         );
         if (!orderItem) {
-          continue; 
+          continue;
         }
 
         const existingReview = await Review.findOne({
@@ -693,23 +693,6 @@ exports.rateFood = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(400).json({ error: error.message });
-  }
-};
-
-// Function to update the MenuItem rating based on reviews
-const updateMenuItemRating = async (MenuItemId) => {
-  const allReviews = await Review.findAll({
-    where: { MenuItemId },
-  });
-
-  if (allReviews.length > 0) {
-    const averageRating =
-      allReviews.reduce((acc, review) => acc + review.rating, 0) /
-      allReviews.length;
-
-    const menuItem = await MenuItem.findByPk(MenuItemId);
-    menuItem.rating = averageRating;
-    await menuItem.save();
   }
 };
 
@@ -758,7 +741,11 @@ exports.statusReportPDF = async (req, res) => {
         break;
       case "all":
         expectedDeliveryLabel = "Delivered / Cancelled / Completed At";
+        whereCondition.status = { [Op.not]: null };
+        break;
       default:
+        expectedDeliveryLabel = "Delivered / Cancelled / Completed At";
+        whereCondition.status = { [Op.not]: null };
         break;
     }
 
@@ -912,6 +899,23 @@ cron.schedule("* * * * *", () => {
   console.log("⏳ Running order status update...");
   updateOrderStatuses();
 });
+// Function to update the MenuItem rating based on reviews
+const updateMenuItemRating = async (MenuItemId) => {
+  const allReviews = await Review.findAll({
+    where: { MenuItemId },
+  });
+
+  if (allReviews.length > 0) {
+    const averageRating =
+      allReviews.reduce((acc, review) => acc + review.rating, 0) /
+      allReviews.length;
+
+    const menuItem = await MenuItem.findByPk(MenuItemId);
+    menuItem.rating = averageRating;
+    await menuItem.save();
+  }
+};
+
 function formatDate() {
   const now = new Date();
   const day = String(now.getDate()).padStart(2, "0");
@@ -1027,7 +1031,6 @@ const getOrderStatusReport = (
 };
 const updateOrderStatuses = async () => {
   try {
-    // Fetch all orders that are still active (not delivered or canceled)
     const orders = await Order.findAll({
       where: {
         status: { [Op.in]: ["pending", "preparing", "on the way"] },
@@ -1067,7 +1070,7 @@ const updateOrderStatuses = async () => {
         newStatus = "delivered";
         completedAt = currentTime.format("YYYY-MM-DD HH:mm:ss");
         if (paymentStatus === "unpaid") {
-          newPaymentStatus = "paid"; // Update payment status if the order is delivered
+          newPaymentStatus = "paid";
         }
       } else if (elapsedMinutes >= preparationTime) {
         newStatus = "on the way";

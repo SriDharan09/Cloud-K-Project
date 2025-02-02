@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"username\": \"Admin\",\n  \"email\": \"sridharselvaraj021@gmail.com\",\n  \"password\": \"Admin@1\",\n  \"RoleId\": 1\n}\n",
+							"raw": "{\n  \"username\": \"admin\",\n  \"email\": \"sridharselvaraj02@gmail.com\",\n  \"password\": \"Admin@1\",\n  \"RoleId\": 1\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -46,7 +46,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"email\": \"sridharselvaraj021@gmail.com\",\n  \"password\": \"Admin@1\"\n}",
+							"raw": "{\n  \"email\": \"sridharselvaraj02@gmail.com\",\n  \"password\": \"Admin@1\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -76,7 +76,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\" : \"sridharselvaraj9102001@gmail.com\"\n}",
+							"raw": "{\n    \"email\" : \"sridharselvaraj02@gmail.com\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -106,7 +106,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\" : \"sridharselvaraj9102001@gmail.com\",\n    \"atoken\" : \"2e3124e0d2f9bb05ddb89144b54747831d371c671ba095242caefd93f1154553\",\n    \"newPassword\": \"Admin@001\"\n}",
+							"raw": "{\n    \"email\" : \"sridharselvaraj02@gmail.com\",\n    \"newPassword\": \"Owner@1\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -114,7 +114,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/auth/resetPass",
+							"raw": "http://localhost:5000/api/auth/resetPass/fa0536c39f9965f471a4c7bcc3e00342a16ddbd47638aac864f5aa0c5186ac4f",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -123,7 +123,8 @@
 							"path": [
 								"api",
 								"auth",
-								"resetPass"
+								"resetPass",
+								"fa0536c39f9965f471a4c7bcc3e00342a16ddbd47638aac864f5aa0c5186ac4f"
 							]
 						}
 					},
@@ -136,7 +137,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\" : \"sridharselvaraj021@gmail.com\",\n    \"verificationCode\" : \"220460\"\n}",
+							"raw": "{\n    \"email\" : \"sridharselvaraj02@gmail.com\",\n    \"verificationCode\" : \"840401\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -531,7 +532,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Non veg Lollipop\",\n  \"description\": \"Delicious 65 lettuce and mayo\",\n  \"price\": \"359.00\",\n  \"CategoryId\": 1,\n  \"BranchId\": 2,\n  \"status\": \"AVAILABLE\",\n  \"preparationTime\": 15,\n  \"isSpecial\": false\n}\n",
+							"raw": "{\n  \"name\": \"Fired Rice\",\n  \"description\": \"Delicious Fried rice with Spciy garlic chutney\",\n  \"price\": \"190.00\",\n  \"CategoryId\": 2,\n  \"BranchId\": 1,\n  \"status\": \"AVAILABLE\",\n  \"preparationTime\": 20,\n  \"isSpecial\": false\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -725,12 +726,24 @@
 			"item": [
 				{
 					"name": "New Order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"BranchId\": 1,\n  \"items\": [\n    {\n      \"MenuItemId\": 1,\n      \"quantity\": 1\n    },\n    {\n      \"MenuItemId\": 3,\n      \"quantity\": 1\n    }\n  ],\n  \"customerName\": \"John Doe\",\n  \"customerContact\": \"+1234567890\",\n  \"customerAddress\": \"123 Main Street, Apt 4B, City, Country\",\n  \"notes\": \"Please include extra napkins.\",\n  \"specialInstructions\": \"No onions in the dish.\",\n  \"paymentMethod\": \"online\"\n}\n",
+							"raw": "{\n  \"BranchId\": 1,\n  \"items\": [\n    {\n      \"MenuItemId\": 1,\n      \"quantity\": 3\n    },\n    {\n      \"MenuItemId\": 2,\n      \"quantity\": 2\n    }\n  ],\n  \"offerId\" :4,\n  \"customerName\": \"John Sri\",\n  \"customerContact\": \"+1234567890\",\n  \"customerAddress\": \"123 Main Street, Apt 4B, City, Country\",\n  \"notes\": \"Please include extra napkins.\",\n  \"specialInstructions\": \"No onions in the dish.\",\n  \"paymentMethod\": \"online\",\n  \"deliveryDistance\" : 1\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -753,22 +766,21 @@
 					"response": []
 				},
 				{
-					"name": "Order Completed",
+					"name": "Rate order",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJrdW1hci5zIiwiZW1haWwiOiJrdW1hckBnbWFpbC5jb20iLCJSb2xlSWQiOjIsImlhdCI6MTcxODA5OTE3NSwiZXhwIjoxNzE4MTAyNzc1fQ.B6W4Rs5Hbop0iYd6WqYo2OTKkuNOXBLUJN4So0XFTFk",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PUT",
+						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// {\n//     \"orderId\": 18,\n//     \"WholeRating\": true,\n//     \"overallRating\": 5,\n//     \"comment\": \"Perfect fried rice!\",\n//     \"suggestion\": \"None.\",\n//     \"complaints\": \"None.\",\n//     \"orderComment\":\"fast Delovery\"\n// }\n{\n    \"orderId\": 2,\n    \"WholeRating\": true,\n    \"overallRating\": 5,\n    \"ratings\": [\n        {\n            \"MenuItemId\": 1,\n            \"rating\": 4,\n            \"orderComment\": \"fast Delovery\",\n            \"comment\": \"Delicious gravy!\",\n            \"suggestion\": \"Would love more spice.\",\n            \"complaints\": \"Delivery was on time.\"\n        },\n        {\n            \"MenuItemId\": 2,\n            \"rating\": 1,\n            \"orderComment\": \"fast Delovery\",\n            \"comment\": \"Perfect fried rice!\",\n            \"suggestion\": \"None.\",\n            \"complaints\": \"None.\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "http://localhost:5000/api/orders/3/status",
+							"raw": "http://localhost:5000/api/orders/rate",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -777,30 +789,28 @@
 							"path": [
 								"api",
 								"orders",
-								"3",
-								"status"
+								"rate"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Cancel Order",
+					"name": "Manual Status change",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJrdW1hci5zIiwiZW1haWwiOiJrdW1hckBnbWFpbC5jb20iLCJSb2xlSWQiOjIsImlhdCI6MTcxODA5OTE3NSwiZXhwIjoxNzE4MTAyNzc1fQ.B6W4Rs5Hbop0iYd6WqYo2OTKkuNOXBLUJN4So0XFTFk",
-									"type": "string"
-								}
-							]
-						},
 						"method": "PUT",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"action\" : \"complete\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "http://localhost:5000/api/orders/3/cancel",
+							"raw": "http://localhost:5000/api/orders/7/status",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -809,8 +819,8 @@
 							"path": [
 								"api",
 								"orders",
-								"3",
-								"cancel"
+								"7",
+								"status"
 							]
 						}
 					},
@@ -838,11 +848,23 @@
 				},
 				{
 					"name": "Get Order By Id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
 					"request": {
 						"method": "GET",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "http://localhost:5000/api/orders/21",
+							"raw": "http://localhost:5000/api/orders/3",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -851,7 +873,7 @@
 							"path": [
 								"api",
 								"orders",
-								"21"
+								"3"
 							]
 						}
 					},
@@ -859,9 +881,21 @@
 				},
 				{
 					"name": "Bulk Filter",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
 					"request": {
 						"method": "GET",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
 							"raw": "http://localhost:5000/api/orders/getFilteredOrder",
 							"protocol": "http",
@@ -873,6 +907,109 @@
 								"api",
 								"orders",
 								"getFilteredOrder"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Filter by Txn num",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"TxnReferenceNumber\" : \"TXN-020225-53fb42af\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/orders/getByTxnNum",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"orders",
+								"getByTxnNum"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Report",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var template = `\r",
+									"<style type=\"text/css\">\r",
+									"    .tftable {font-size:14px;color:#333333;width:100%;border-width: 1px;border-color: #87ceeb;border-collapse: collapse;}\r",
+									"    .tftable th {font-size:18px;background-color:#87ceeb;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;text-align:left;}\r",
+									"    .tftable tr {background-color:#ffffff;}\r",
+									"    .tftable td {font-size:14px;border-width: 1px;padding: 8px;border-style: solid;border-color: #87ceeb;}\r",
+									"    .tftable tr:hover {background-color:#e0ffff;}\r",
+									"</style>\r",
+									"\r",
+									"<table class=\"tftable\" border=\"1\">\r",
+									"    <tr>\r",
+									"        <th>Base64 Data</th>\r",
+									"    </tr>\r",
+									"    <tr>\r",
+									"        <td>{{response.base64}}</td>\r",
+									"    </tr>\r",
+									"</table>\r",
+									"`;\r",
+									"\r",
+									"function constructVisualizerPayload() {\r",
+									"    return { response: pm.response.json() }\r",
+									"}\r",
+									"\r",
+									"pm.visualizer.set(template, constructVisualizerPayload());"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/orders/report?startDate=2025-02-02&endDate=2025-02-02&filterType=not_delivered",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"orders",
+								"report"
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2025-02-02"
+								},
+								{
+									"key": "endDate",
+									"value": "2025-02-02"
+								},
+								{
+									"key": "filterType",
+									"value": "not_delivered"
+								}
 							]
 						}
 					},
@@ -912,13 +1049,33 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Special Discount\",\n    \"description\": \"Get 30% off on all orders above $50\",\n    \"discount_percentage\": 30,\n    \"valid_from\": \"2024-06-01T00:00:00.000Z\",\n    \"valid_to\": \"2024-06-10T23:59:59.999Z\",\n    \"min_order_amount\": 50\n}\n",
+							"raw": "{\n    \"name\": \"Special Discount\",\n    \"description\": \"Get 25% off on all orders above $500\",\n    \"discount_percentage\": 5,\n    \"valid_from\": \"2025-02-01T00:00:00.000Z\",\n    \"valid_to\": \"2025-02-03T23:59:59.999Z\",\n    \"min_order_amount\": 500,\n    \"redeemable\":true,\n    \"redeem_limit\":1\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
+						"url": {
+							"raw": "http://localhost:5000/api/offers",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"offers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Offer List",
+					"request": {
+						"method": "GET",
+						"header": [],
 						"url": {
 							"raw": "http://localhost:5000/api/offers",
 							"protocol": "http",
@@ -963,6 +1120,27 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Delete Offer",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/offers/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"offers",
+								"1"
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"event": [
@@ -994,16 +1172,6 @@
 				{
 					"name": "Add Address",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJzcmlkaGFyLnMiLCJlbWFpbCI6InNyaWRoYXJzZWx2YXJhajAyQGdtYWlsLmNvbSIsIlJvbGVJZCI6MSwiaWF0IjoxNzE4MTA0NDg0LCJleHAiOjE3MTgxMDgwODR9.O9nSPksSkS6QqsVHefG31ByJ_comdHiWNmPzIo2LDJk",
-									"type": "string"
-								}
-							]
-						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -1038,21 +1206,11 @@
 				{
 					"name": "Add Review",
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJzcmlkaGFyLnMiLCJlbWFpbCI6InNyaWRoYXJzZWx2YXJhajAyQGdtYWlsLmNvbSIsIlJvbGVJZCI6MSwiaWF0IjoxNzE4MTA0NDg0LCJleHAiOjE3MTgxMDgwODR9.O9nSPksSkS6QqsVHefG31ByJ_comdHiWNmPzIo2LDJk",
-									"type": "string"
-								}
-							]
-						},
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"MenuItemId\": 1,\n  \"rating\": 4,\n  \"comment\": \"Great food, loved it!\"\n}\n",
+							"raw": "{\n  \"MenuItemId\": 2,\n  \"rating\": 4,\n  \"comment\": \"Great food, loved it!\"\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1060,7 +1218,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/userAddresses",
+							"raw": "http://localhost:5000/api/reviews",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1068,7 +1226,7 @@
 							"port": "5000",
 							"path": [
 								"api",
-								"userAddresses"
+								"reviews"
 							]
 						}
 					},
@@ -1082,7 +1240,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJBZG1pbiIsImVtYWlsIjoic3JpZGhhcnNlbHZhcmFqMDIxQGdtYWlsLmNvbSIsIlJvbGVJZCI6MSwidXNlckNJRklkIjoiQ0lGOTM5MDMyIiwiaWF0IjoxNzM3OTk5NTY2LCJleHAiOjE3MzgwMDMxNjZ9.LGl9ZStcFtpQ5bnxwqp0vkpEpBXW-YxclRnD3oJN1ZU",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsImVtYWlsIjoic3JpZGhhcnNlbHZhcmFqMDJAZ21haWwuY29tIiwiUm9sZUlkIjoxLCJ1c2VyQ0lGSWQiOiJDSUYyNzk4MzIiLCJpYXQiOjE3Mzg0OTMyNjUsImV4cCI6MTczODQ5Njg2NX0.z5xdhfDT5sJ53OJHT0MimJlbyRRzWJNGuYUd2ZYNonI",
 				"type": "string"
 			}
 		]

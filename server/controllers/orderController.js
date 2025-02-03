@@ -75,6 +75,35 @@ exports.createOrder = async (req, res) => {
       }
     }
 
+    // Validate Menu Items and Branch Association
+    const invalidMenuItems = [];
+
+    for (const item of items) {
+      const menuItem = await MenuItem.findByPk(item.MenuItemId);
+
+      if (!menuItem) {
+        invalidMenuItems.push(`Invalid MenuItem ID: ${item.MenuItemId}`);
+      } else if (menuItem.BranchId !== BranchId) {
+        invalidMenuItems.push(
+          `MenuItem ID: ${item.MenuItemId} does not belong to Branch ID: ${BranchId}`
+        );
+      }
+    }
+
+    // If there are invalid menu items, return an error response listing all issues
+    if (invalidMenuItems.length > 0) {
+      orderLogger.error("Invalid menu items in order", {
+        requestInfo,
+        performedBy,
+        errors: invalidMenuItems,
+      });
+
+      return res.status(400).json({
+        error: "Some menu items are invalid or do not belong to the branch.",
+        details: invalidMenuItems,
+      });
+    }
+
     if (items.length === 0) {
       orderLogger.error("Items array cannot be empty", {
         requestInfo,
@@ -491,7 +520,7 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     if (action === "complete") {
-      if (order.status === "completed") {
+      if (order.status === "completed" || order.status === "delivered") {
         return res
           .status(400)
           .json({ error: "This Order is Already delivered" });
@@ -581,10 +610,15 @@ exports.rateFood = async (req, res) => {
     }
 
     const order = await Order.findByPk(orderId);
-    if (!order || order.status !== "delivered") {
+    if (
+      !order ||
+      (order.status !== "delivered" && order.status !== "completed")
+    ) {
       return res
         .status(400)
-        .json({ error: "Reviews can only be added for delivered orders" });
+        .json({
+          error: "Reviews can only be added for delivered or completed orders",
+        });
     }
 
     if (order.orderBy !== userCifId) {
@@ -646,14 +680,17 @@ exports.rateFood = async (req, res) => {
     }
 
     if (ratings && Array.isArray(ratings)) {
+      const mismatchedItems = [];
+      const orderedMenuItems = orderItems.map((item) => item.MenuItemId);
+
       for (let i = 0; i < ratings.length; i++) {
         const { MenuItemId, rating, comment, suggestion, complaints } =
           ratings[i];
-
         const orderItem = orderItems.find(
           (item) => item.MenuItemId === MenuItemId
         );
         if (!orderItem) {
+          mismatchedItems.push(MenuItemId);
           continue;
         }
 
@@ -669,6 +706,7 @@ exports.rateFood = async (req, res) => {
             complaints,
           });
         } else {
+          // If no review exists, create a new review
           await Review.create({
             rating,
             comment,
@@ -681,7 +719,24 @@ exports.rateFood = async (req, res) => {
           });
         }
 
+        // Update the menu item rating after review
         await updateMenuItemRating(MenuItemId);
+      }
+
+      // If there are any mismatched items, return an error with details
+      if (mismatchedItems.length > 0) {
+        return res.status(400).json({
+          error: `Oops! It seems the following menu items are not part of the order: ${mismatchedItems.join(
+            ", "
+          )}. Please check your order and try again.`,
+          details: {
+            orderId: orderId,
+            mismatchedMenuItems: mismatchedItems,
+            message:
+              "The menu items you attempted to rate are not included in this order. Please verify your order and try again with the correct items.",
+            orderedMenuItems: orderedMenuItems,
+          },
+        });
       }
 
       return res.json({

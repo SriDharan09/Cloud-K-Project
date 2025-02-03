@@ -73,14 +73,17 @@ db.UserAddress.belongsTo(db.User);
 
 async function resetDatabase() {
   try {
+    console.log("Disabling foreign key checks...");
     // Disable foreign key checks
     await sequelize.query("SET FOREIGN_KEY_CHECKS = 0");
     console.log("Foreign key checks disabled.");
 
+    console.log("Dropping tables...");
     // Drop tables
     await sequelize.query("DROP TABLE IF EXISTS Branch");
     console.log("Tables dropped successfully.");
 
+    console.log("Re-enabling foreign key checks...");
     // Re-enable foreign key checks
     await sequelize.query("SET FOREIGN_KEY_CHECKS = 1");
     console.log("Foreign key checks re-enabled.");

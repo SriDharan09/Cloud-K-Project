@@ -1,15 +1,17 @@
 const { exec } = require("child_process");
 
 let seeders = [
-  "usersSeeder.js",
   "branchesSeeder.js",
   "categoriesSeeder.js",
   "menuItemsSeeder.js",
   "OffersSeeder.js",
   "rolesSeeder.js",
+  "usersSeeder.js",
   "CustomizationSeeder.js",
 ];
-seeders.splice(-6);
+ //seeders.splice(-3);
+ seeders.splice(-7);
+
 async function runSeeders() {
   for (const seeder of seeders) {
     console.log(`Running seeder: ${seeder}`);

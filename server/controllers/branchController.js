@@ -164,7 +164,6 @@ exports.getBranchWithDetails = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Construct SQL query to fetch branch with details
     const sqlQuery = `
       SELECT 
         b.id AS branchId,
@@ -198,7 +197,6 @@ exports.getBranchWithDetails = async (req, res) => {
         b.id = :id
     `;
 
-    // Execute the query
     const branchDetails = await sequelize.query(sqlQuery, {
       replacements: { id },
       type: sequelize.QueryTypes.SELECT,
@@ -224,7 +222,7 @@ exports.getBranchWithDetails = async (req, res) => {
         };
         acc.push(branch);
       }
-
+    
       if (row.categoryId) {
         let category = branch.categories.find(c => c.id === row.categoryId);
         if (!category) {
@@ -235,33 +233,40 @@ exports.getBranchWithDetails = async (req, res) => {
           };
           branch.categories.push(category);
         }
-
+    
         if (row.menuItemId) {
-          category.menuItems.push({
-            id: row.menuItemId,
-            name: row.menuItemName,
-            description: row.menuItemDescription,
-            price: row.menuItemPrice,
-            status: row.menuItemStatus,
-            imageUrl: row.menuItemImageUrl,
-            rating: row.menuItemRating,
-            preparationTime: row.menuItemPreparationTime,
-            isSpecial: row.menuItemIsSpecial,
-            discountPrice: row.menuItemDiscountPrice,
+          let existingMenuItem = category.menuItems.find(m => m.id === row.menuItemId);
+          if (!existingMenuItem) {
+            category.menuItems.push({
+              id: row.menuItemId,
+              name: row.menuItemName,
+              description: row.menuItemDescription,
+              price: row.menuItemPrice,
+              status: row.menuItemStatus,
+              imageUrl: row.menuItemImageUrl,
+              rating: row.menuItemRating,
+              preparationTime: row.menuItemPreparationTime,
+              isSpecial: row.menuItemIsSpecial,
+              discountPrice: row.menuItemDiscountPrice,
+            });
+          }
+        }
+      }
+    
+      if (row.orderId) {
+        let existingOrder = branch.orders.find(o => o.id === row.orderId);
+        if (!existingOrder) {
+          branch.orders.push({
+            id: row.orderId,
+            totalPrice: row.orderTotalPrice,
+            status: row.orderStatus,
           });
         }
       }
-
-      if (row.orderId) {
-        branch.orders.push({
-          id: row.orderId,
-          totalPrice: row.orderTotalPrice,
-          status: row.orderStatus,
-        });
-      }
-
+    
       return acc;
     }, []);
+    
 
     const response = { status: 200, branch: organizedData[0] };
     branchLogger.info('Fetched branch with details', { req: requestInfo, res: response });
@@ -282,7 +287,6 @@ exports.filterBranches = async (req, res) => {
   try {
     const { branchName } = req.body;
 
-    // Construct SQL query with correct column names
     const sqlQuery = `
     SELECT 
     Branches.id AS branchId,
@@ -331,56 +335,33 @@ exports.filterBranches = async (req, res) => {
 
     // Organize the data
     const organizedData = branches.reduce((acc, row) => {
-      const branch = acc.find(b => b.id === row.branchId);
+      let branch = acc.find(b => b.id === row.branchId);
       if (!branch) {
-        acc.push({
+        branch = {
           id: row.branchId,
           name: row.branchName,
           address: row.branchAddress,
           phone: row.branchPhone,
-          categories: row.categoryId ? [{
+          categories: [],
+          orders: [],
+        };
+        acc.push(branch);
+      }
+    
+      if (row.categoryId) {
+        let category = branch.categories.find(c => c.id === row.categoryId);
+        if (!category) {
+          category = {
             id: row.categoryId,
             name: row.categoryName,
-            menuItems: row.menuItemId ? [{
-              id: row.menuItemId,
-              name: row.menuItemName,
-              description: row.menuItemDescription,
-              price: row.menuItemPrice,
-              status: row.menuItemStatus,
-              imageUrl: row.menuItemImageUrl,
-              rating: row.menuItemRating,
-              preparationTime: row.menuItemPreparationTime,
-              isSpecial: row.menuItemIsSpecial,
-              discountPrice: row.menuItemDiscountPrice,
-            }] : [],
-          }] : [],
-          orders: row.orderId ? [{
-            id: row.orderId,
-            totalPrice: row.orderTotalPrice,
-            status: row.orderStatus,
-          }] : [],
-        });
-      } else {
-        if (row.categoryId) {
-          const category = branch.categories.find(c => c.id === row.categoryId);
-          if (!category) {
-            branch.categories.push({
-              id: row.categoryId,
-              name: row.categoryName,
-              menuItems: row.menuItemId ? [{
-                id: row.menuItemId,
-                name: row.menuItemName,
-                description: row.menuItemDescription,
-                price: row.menuItemPrice,
-                status: row.menuItemStatus,
-                imageUrl: row.menuItemImageUrl,
-                rating: row.menuItemRating,
-                preparationTime: row.menuItemPreparationTime,
-                isSpecial: row.menuItemIsSpecial,
-                discountPrice: row.menuItemDiscountPrice,
-              }] : [],
-            });
-          } else if (row.menuItemId) {
+            menuItems: [],
+          };
+          branch.categories.push(category);
+        }
+    
+        if (row.menuItemId) {
+          let existingMenuItem = category.menuItems.find(m => m.id === row.menuItemId);
+          if (!existingMenuItem) {
             category.menuItems.push({
               id: row.menuItemId,
               name: row.menuItemName,
@@ -395,7 +376,12 @@ exports.filterBranches = async (req, res) => {
             });
           }
         }
-        if (row.orderId) {
+      }
+    
+      if (row.orderId) {
+        // ✅ CHECK IF ORDER ALREADY EXISTS
+        let existingOrder = branch.orders.find(o => o.id === row.orderId);
+        if (!existingOrder) {
           branch.orders.push({
             id: row.orderId,
             totalPrice: row.orderTotalPrice,
@@ -403,9 +389,10 @@ exports.filterBranches = async (req, res) => {
           });
         }
       }
+    
       return acc;
     }, []);
-
+    
     const response = { status: 200, branches: organizedData };
     branchLogger.info('Filtered branches fetched successfully', { req: requestInfo, res: response });
 

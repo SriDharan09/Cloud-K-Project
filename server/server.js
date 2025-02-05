@@ -3,6 +3,9 @@ const express = require('express');
 const app = express();
 const rateLimit = require('express-rate-limit');
 const db = require('./models');
+const cors = require('cors');
+
+app.use(cors());
 
 const authRoutes = require('./routers/auth');
 const categoryRoutes = require('./routers/category');

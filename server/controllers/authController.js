@@ -14,6 +14,7 @@ const {
 const crypto = require("crypto");
 const { Op } = require("sequelize");
 const { log } = require("console");
+const { title } = require("process");
 
 const registrationCache = {};
 
@@ -67,7 +68,7 @@ exports.register = async (req, res) => {
 
     // Validate required fields
     if (!username || !email || !password) {
-      const response = { status: 400, error: "All fields are required" };
+      const response = { status: 400,title: "Registration Error", error: "All fields are required" };
       logger.warn("Registration attempt with missing fields", {
         req: requestInfo,
         res: response,
@@ -80,7 +81,7 @@ exports.register = async (req, res) => {
     // Check if the email is already registered
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
-      const response = { status: 400, error: "Email is already registered." };
+      const response = { status: 400,title: "Registration Error", error: "Email is already registered." };
       logger.warn("Registration failed - Email already registered", {
         req: requestInfo,
         res: response,
@@ -91,7 +92,7 @@ exports.register = async (req, res) => {
     // Check if the role is valid
     const isAvailableRole = await Role.findOne({ where: { id: RoleId } });
     if (!isAvailableRole) {
-      const response = { status: 400, error: "Invalid role" };
+      const response = { status: 400,title: "Registration Error", error: "Invalid role" };
       logger.warn("Registration failed - Invalid role", {
         req: requestInfo,
         res: response,
@@ -102,7 +103,7 @@ exports.register = async (req, res) => {
     // Validate the password
     const passwordErrors = await validatePassword(password);
     if (passwordErrors.length > 0) {
-      const response = { status: 400, error: passwordErrors.join(", ") };
+      const response = { status: 400,title: "Registration Error", error: passwordErrors.join(", ") };
       logger.warn("Registration failed - Password validation failed", {
         req: requestInfo,
         res: response,
@@ -138,6 +139,7 @@ exports.register = async (req, res) => {
 
     const response = {
       status: 200,
+      title: "Verify Your Email Address",
       message:
         "Verification code sent to your email. Please verify to complete registration.",
     };
@@ -251,7 +253,8 @@ exports.login = async (req, res) => {
     if (!email || !password) {
       const response = {
         status: 400,
-        error: "Email and password are required",
+        title: "Login Error",
+        message: "Email and password are required",
       };
       logger.warn("Login attempt with missing fields", {
         req: requestInfo,
@@ -266,7 +269,11 @@ exports.login = async (req, res) => {
     });
 
     if (!user) {
-      const response = { status: 400, error: "Invalid credentials" };
+      const response = {
+        status: 400,
+        title: "Login Error",
+        message: "Invalid credentials",
+      };
       logger.info("Login failed - user not found", {
         email,
         req: requestInfo,
@@ -283,14 +290,15 @@ exports.login = async (req, res) => {
       const lastAttemptTime = new Date(user.lastLoginAttempt);
       const unlockTime = new Date(lastAttemptTime.getTime() + lockDuration);
       const formattedUnlockTime = moment(unlockTime)
-      .tz("Asia/Kolkata")
-      .format("YYYY-MM-DD HH:mm:ss");
-    
-    const response = {
-      status: 403,
-      error: "Account locked for 30 mins. Try again later.",
-      unlocksAt: formattedUnlockTime, // Now in IST format
-    };
+        .tz("Asia/Kolkata")
+        .format("YYYY-MM-DD HH:mm:ss");
+
+      const response = {
+        status: 403,
+        title: "Login Error",
+        message: "Account locked for 30 mins. Try again later.",
+        unlocksAt: formattedUnlockTime, // Now in IST format
+      };
       logger.warn("Account locked due to multiple failed login attempts", {
         email,
         req: requestInfo,
@@ -307,7 +315,11 @@ exports.login = async (req, res) => {
         lastLoginAttempt: new Date(),
       });
 
-      const response = { status: 400, error: "Invalid credentials" };
+      const response = {
+        status: 400,
+        title: "Login Error",
+        message: "Invalid credentials",
+      };
       logger.info("Login failed - invalid password", {
         email,
         req: requestInfo,
@@ -344,7 +356,11 @@ exports.login = async (req, res) => {
 
     res.status(response.status).json(response);
   } catch (error) {
-    const response = { status: 500, error: "Internal server error" };
+    const response = {
+      status: 500,
+      title: "Login Error",
+      message: "we're facing some techincal diffiulties please try again",
+    };
     logger.error("Login error", { error, req: requestInfo, res: response });
     res.status(response.status).json(response);
   }
@@ -360,7 +376,7 @@ exports.forgotPassword = async (req, res) => {
 
     const user = await User.findOne({ where: { email } });
     if (!user) {
-      const response = { status: 404, error: "User not found" };
+      const response = { status: 404, title: "Password Reset Error", error: "User not found" };
       logger.warn("Password reset request failed - User not found", {
         req: requestInfo,
         res: response,

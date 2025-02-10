@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { userLogin } from "../../api/authApi.js";
+import { userLogin, userRegister } from "../../api/authApi.js";
 
 const initialState = {
   user: null,
@@ -18,7 +18,7 @@ export const loginAsync = createAsyncThunk(
       const userData = await userLogin(credentials);
 
       if (!userData.user) {
-        return thunkAPI.rejectWithValue("Invalid user data received");
+        return userData;
       }
 
       localStorage.setItem("user", JSON.stringify(userData.user));
@@ -28,29 +28,25 @@ export const loginAsync = createAsyncThunk(
 
       return userData;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response?.data?.error || "Login failed");
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.error || "Login failed"
+      );
     }
   }
 );
 
 export const signUpAsync = createAsyncThunk(
-  "auth/signup", // 🔹 Renamed to avoid conflict with loginAsync
+  "auth/signup",
   async (credentials, thunkAPI) => {
     try {
-      const userData = await userLogin(credentials);
-
-      if (!userData.user) {
-        return thunkAPI.rejectWithValue("Invalid user data received");
-      }
-
-      localStorage.setItem("user", JSON.stringify(userData.user));
-      localStorage.setItem("token", userData.token);
-      localStorage.setItem("CIFID", userData.user.cifId);
-      localStorage.setItem("role", userData.user.roleName);
+      const userData = await userRegister(credentials);
+      console.log(userData);
 
       return userData;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response?.data?.error || "Signup failed");
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.error || "Signup failed"
+      );
     }
   }
 );

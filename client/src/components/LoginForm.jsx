@@ -1,5 +1,5 @@
 import React from "react";
-import Input from "./Input"; 
+import Input from "./Input";
 
 const LoginForm = ({
   mode,
@@ -7,6 +7,10 @@ const LoginForm = ({
   setEmail,
   password,
   setPassword,
+  fullName,
+  setFullName,
+  repeatpassword,
+  setRepeatpassword,
   onSubmit,
 }) => (
   <form onSubmit={onSubmit}>
@@ -17,7 +21,7 @@ const LoginForm = ({
           id="email"
           label="Email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)} 
+          onChange={(e) => setEmail(e.target.value)}
         />
         <Input
           type="password"
@@ -30,18 +34,36 @@ const LoginForm = ({
 
       <div className="form-group form-group--signup">
         <>
-          <Input type="text" id="fullname" label="Full Name" disabled={false} />
-          <Input type="email" id="email" label="Email" disabled={false} />
+          <Input
+            type="text"
+            id="fullname"
+            label="Full Name"
+            disabled={false}
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+          />
+          <Input
+            type="email"
+            id="email"
+            label="Email"
+            disabled={false}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
           <Input
             type="password"
             id="createpassword"
             label="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             disabled={false}
           />
           <Input
             type="password"
             id="repeatpassword"
             label="Repeat Password"
+            value={repeatpassword}
+            onChange={(e) => setRepeatpassword(e.target.value)}
             disabled={false}
           />
         </>

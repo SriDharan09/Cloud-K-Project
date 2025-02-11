@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { setUser } from "./redux/slice/authSlice";
 import AppRoutes from "./routes/AppRoutes";
 import { NotificationProvider } from "./context/NotificationProvider";
+import { LoaderProvider } from "./context/LoaderContext";
 import "./index.css";
 
 function App() {
@@ -20,9 +21,11 @@ function App() {
 
   return (
     <Router>
-      <NotificationProvider>
-        <AppRoutes />
-      </NotificationProvider>
+      <LoaderProvider>
+        <NotificationProvider>
+          <AppRoutes />
+        </NotificationProvider>
+      </LoaderProvider>
     </Router>
   );
 }

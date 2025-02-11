@@ -68,7 +68,11 @@ exports.register = async (req, res) => {
 
     // Validate required fields
     if (!username || !email || !password) {
-      const response = { status: 400,title: "Registration Error", error: "All fields are required" };
+      const response = {
+        status: 400,
+        title: "Registration Error",
+        error: "All fields are required",
+      };
       logger.warn("Registration attempt with missing fields", {
         req: requestInfo,
         res: response,
@@ -81,7 +85,11 @@ exports.register = async (req, res) => {
     // Check if the email is already registered
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
-      const response = { status: 400,title: "Registration Error", error: "Email is already registered." };
+      const response = {
+        status: 400,
+        title: "Registration Error",
+        error: "Email is already registered.",
+      };
       logger.warn("Registration failed - Email already registered", {
         req: requestInfo,
         res: response,
@@ -92,7 +100,11 @@ exports.register = async (req, res) => {
     // Check if the role is valid
     const isAvailableRole = await Role.findOne({ where: { id: RoleId } });
     if (!isAvailableRole) {
-      const response = { status: 400,title: "Registration Error", error: "Invalid role" };
+      const response = {
+        status: 400,
+        title: "Registration Error",
+        error: "Invalid role",
+      };
       logger.warn("Registration failed - Invalid role", {
         req: requestInfo,
         res: response,
@@ -101,15 +113,19 @@ exports.register = async (req, res) => {
     }
 
     // Validate the password
-    const passwordErrors = await validatePassword(password);
-    if (passwordErrors.length > 0) {
-      const response = { status: 400,title: "Registration Error", error: passwordErrors.join(", ") };
-      logger.warn("Registration failed - Password validation failed", {
-        req: requestInfo,
-        res: response,
-      });
-      return res.status(response.status).json(response);
-    }
+    // const passwordErrors = await validatePassword(password);
+    // if (passwordErrors.length > 0) {
+    //   const response = {
+    //     status: 400,
+    //     title: "Registration Error",
+    //     error: passwordErrors.join(", "),
+    //   };
+    //   logger.warn("Registration failed - Password validation failed", {
+    //     req: requestInfo,
+    //     res: response,
+    //   });
+    //   return res.status(response.status).json(response);
+    // }
 
     // Generate a verification code
     const verificationCode = generateNumericCode(6);
@@ -167,6 +183,7 @@ exports.verifyEmail = async (req, res) => {
     if (!userData) {
       const response = {
         status: 400,
+        title: "Verification Error",
         error: "Verification code expired or invalid registration data.",
       };
       logger.warn("Verification failed - No registration data found", {
@@ -190,6 +207,7 @@ exports.verifyEmail = async (req, res) => {
     ) {
       const response = {
         status: 400,
+        title: "Verification Error",
         error: "Invalid or expired verification code.",
       };
       logger.warn(
@@ -221,6 +239,7 @@ exports.verifyEmail = async (req, res) => {
 
     const response = {
       status: 201,
+      title: "Registration Completed",
       message: "Email verified successfully. Registration completed!",
       user: {
         username: newUser.username,
@@ -241,7 +260,10 @@ exports.verifyEmail = async (req, res) => {
     });
     res
       .status(500)
-      .json({ error: "Verification failed. Please try again later." });
+      .json({
+        title: "Verification Error",
+        error: "Verification failed. Please try again later.",
+      });
   }
 };
 
@@ -376,7 +398,11 @@ exports.forgotPassword = async (req, res) => {
 
     const user = await User.findOne({ where: { email } });
     if (!user) {
-      const response = { status: 404, title: "Password Reset Error", error: "User not found" };
+      const response = {
+        status: 404,
+        title: "Password Reset Error",
+        error: "User not found",
+      };
       logger.warn("Password reset request failed - User not found", {
         req: requestInfo,
         res: response,

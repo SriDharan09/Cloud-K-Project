@@ -15,8 +15,11 @@ export const userLogin = async (credentials) => {
         success: false,
         title: error.response.data.title || "Error",
         status: error.response.data.status,
-        message: error.response.data.error || error.response.data.message ||  "Something went wrong",
-        duration : error.response.data.unlocksAt || null
+        message:
+          error.response.data.error ||
+          error.response.data.message ||
+          "Something went wrong",
+        duration: error.response.data.unlocksAt || null,
       };
     }
 
@@ -47,8 +50,11 @@ export const userRegister = async (credentials) => {
       return {
         success: false,
         status: error.response.status,
-        title:  error.response.data.title || "Error",
-        message: error.response.data.error || error.response.data.message ||  "Something went wrong",
+        title: error.response.data.title || "Error",
+        message:
+          error.response.data.error ||
+          error.response.data.message ||
+          "Something went wrong",
       };
     }
 
@@ -56,5 +62,26 @@ export const userRegister = async (credentials) => {
       success: false,
       message: "Network error. Please try again later.",
     };
+  }
+};
+export const userVerification = async (details) => {
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}/auth/verifyUser`,
+      details
+    );
+    return response.data;
+  } catch (error) {
+    if (error?.response) {
+      return {
+        success: false,
+        status: error.response.status,
+        title: error.response.data.title || "Error",
+        message:
+          error.response.data.error ||
+          error.response.data.message ||
+          "Something went wrong",
+      };
+    }
   }
 };

@@ -1,14 +1,20 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { loginAsync, signUpAsync } from "../redux/slice/authSlice";
+import {
+  loginAsync,
+  setUserEmail,
+  signUpAsync,
+} from "../redux/slice/authSlice";
 import LoginForm from "../components/LoginForm";
 import { useNotification } from "../context/NotificationProvider";
 import AsyncModal from "../components/Modal/AsyncModal";
-import { Input } from "antd";
+import { userVerification } from "../api/authApi";
+import { useLoader } from "../context/LoaderContext";
 import "../styles/Login.css";
 
 const Login = () => {
+  const { showLoader, hideLoader } = useLoader();
   const openNotification = useNotification();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,6 +23,7 @@ const Login = () => {
   const [repeatpassword, setRepeatpassword] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
+  var StoredEmail = useSelector((state) => state.auth.email);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -32,7 +39,9 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     const result = await dispatch(loginAsync({ email, password }));
-    if (result) {
+    console.log(result);
+
+    if (!result?.payload?.user) {
       openNotification({
         status: result.payload.status,
         message: result.payload.title,
@@ -47,10 +56,20 @@ const Login = () => {
       openNotification("warning", "Signup Error", "Passwords do not match!");
       return;
     }
+    console.log(email);
 
+    showLoader();
     const result = await dispatch(signUpAsync({ fullName, email, password }));
+    hideLoader();
+    console.log(result);
+
+    setEmail("");
+    setFullName("");
+    setRepeatpassword("");
+    setPassword("");
+
     console.log("Error", result.payload.error);
-    setIsModalOpen(true); // Open verification modal
+    setIsModalOpen(true);
 
     if (result?.payload) {
       openNotification(
@@ -60,8 +79,28 @@ const Login = () => {
       );
     }
   };
-  const handleVerifyCode = async () => {}
+
+  const handleVerifyCode = async () => {
+    const result = await userVerification({
+      email: StoredEmail,
+      verificationCode,
+    });
+    if (result?.status === 200 || result?.status === 201) {
+      setVerificationCode("");
+      setIsModalOpen(false);
+      openNotification(result?.status, result?.title, result?.message);
+    } else {
+      setVerificationCode("");
+      openNotification(result?.status, result?.title, result?.message);
+    }
+  };
   const toggleMode = () => {
+    dispatch(setUserEmail(""));
+    setIsModalOpen(false);
+    setEmail("");
+    setFullName("");
+    setRepeatpassword("");
+    setPassword("");
     setMode((prevMode) => (prevMode === "login" ? "signup" : "login"));
   };
 
@@ -100,27 +139,19 @@ const Login = () => {
         />
       </section>
       {isModalOpen && (
+      <div className=" flex items-center justify-center">
         <AsyncModal
           title="Verify Your Email"
-          content={
-            <>
-              <p>
-                A verification code has been sent to <strong>{email}</strong>.
-                Enter the code below:
-              </p>
-              <Input
-                value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value)}
-                placeholder="Enter Code"
-              />
-
-            </>
-          }
+          content={`A verification code has been sent to ${email}.`}
+          inputLabel="Enter Verification Code"
+          inputValue={verificationCode}
+          setInputValue={setVerificationCode}
           onConfirm={handleVerifyCode}
           triggerText="Verify Email"
-
+          maxLength={6}
         />
-      )}
+      </div>
+    )}
     </div>
   );
 };

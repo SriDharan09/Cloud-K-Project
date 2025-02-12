@@ -13,6 +13,10 @@ module.exports = (sequelize, DataTypes) => {
       phone_number: {
         type: DataTypes.STRING,
       },
+      mainImage: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
     },
     {
       scopes: {

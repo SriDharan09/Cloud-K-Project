@@ -20,12 +20,13 @@ const offerRouter = require('./routers/offer');
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100, 
+  max: 200, 
 });
 
 app.use(limiter);
 app.use(express.json());
 
+app.use("/uploads", express.static("uploads"));
 app.use('/api/auth', authRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/menu', menuRoutes);

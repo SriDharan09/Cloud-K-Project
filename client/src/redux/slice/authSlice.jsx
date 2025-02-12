@@ -92,6 +92,7 @@ const authSlice = createSlice({
       })
       .addCase(loginAsync.rejected, (state, action) => {
         state.loading = false;
+        state.statusCode = action.payload.status;
         state.error = action.payload || "Login failed";
       })
       .addCase(signUpAsync.pending, (state) => {
@@ -106,6 +107,7 @@ const authSlice = createSlice({
       })
       .addCase(signUpAsync.rejected, (state, action) => {
         state.loading = false;
+        state.statusCode = action.payload.status;
         state.error = action.payload || "Signup failed";
       });
   },

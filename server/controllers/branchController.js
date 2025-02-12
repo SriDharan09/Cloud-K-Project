@@ -1,78 +1,118 @@
-const { sequelize } = require('../models'); // Import sequelize instance
-const { Branch, AuditLog } = require('../models');
-const branchLogger = require('../utils/logger/branchLogger'); // Update the path accordingly
+const { sequelize } = require("../models"); // Import sequelize instance
+const { Branch, AuditLog } = require("../models");
+const branchLogger = require("../utils/logger/branchLogger"); // Update the path accordingly
 
 exports.createBranch = async (req, res) => {
   const requestInfo = { method: req.method, url: req.url, body: req.body };
   const performedBy = req.userCIFId;
-  
+
   try {
     const { name, address, phone_number } = req.body;
-    const branch = await Branch.create({ name, address, phone_number });
+    const main_image = req.file ? req.file.filename : null;
+
+    const branch = await Branch.create({
+      name,
+      address,
+      phone_number,
+      mainImage: main_image,
+    });
 
     // Log the creation action
     await AuditLog.create({
-      tableName: 'Branches',
+      tableName: "Branches",
       recordId: branch.id,
-      action: 'CREATE',
+      action: "CREATE",
       newValues: branch.dataValues,
       performedBy,
-      notes: 'Branch created successfully.',
+      notes: "Branch created successfully.",
     });
 
-    const response = { status: 201, message: 'Branch created successfully', branch };
-    branchLogger.info('Branch created successfully', { req: requestInfo, res: response });
+    const response = {
+      status: 201,
+      message: "Branch created successfully",
+      branch,
+    };
+    branchLogger.info("Branch created successfully", {
+      req: requestInfo,
+      res: response,
+    });
 
     res.status(response.status).json(response);
   } catch (error) {
-    const response = { status: 500, error: 'Failed to create branch. Please try again later.' };
-    branchLogger.error('Error creating branch', { req: requestInfo, error });
+    const response = {
+      status: 500,
+      error: "Failed to create branch. Please try again later.",
+    };
+    branchLogger.error("Error creating branch", { req: requestInfo, error });
     res.status(response.status).json(response);
   }
 };
 
 exports.getBranches = async (req, res) => {
   const requestInfo = { method: req.method, url: req.url };
-  
+
   try {
     const branches = await Branch.findAll();
     const response = { status: 200, branches };
-    branchLogger.info('Fetched all branches', { req: requestInfo, res: response });
+    branchLogger.info("Fetched all branches", {
+      req: requestInfo,
+      res: response,
+    });
 
     res.json(response);
   } catch (error) {
-    const response = { status: 500, error: 'Failed to fetch branches. Please try again later.' };
-    branchLogger.error('Error fetching branches', { req: requestInfo, error });
+    const response = {
+      status: 500,
+      error: "Failed to fetch branches. Please try again later.",
+    };
+    branchLogger.error("Error fetching branches", { req: requestInfo, error });
     res.status(response.status).json(response);
   }
 };
 
 exports.getBranchById = async (req, res) => {
   const requestInfo = { method: req.method, url: req.url, params: req.params };
-  
+
   try {
     const { id } = req.params;
     const branch = await Branch.findByPk(id);
     if (!branch) {
-      const response = { status: 404, error: 'Branch not found' };
-      branchLogger.warn('Branch not found', { req: requestInfo, res: response });
+      const response = { status: 404, error: "Branch not found" };
+      branchLogger.warn("Branch not found", {
+        req: requestInfo,
+        res: response,
+      });
       return res.status(response.status).json(response);
     }
-    
+
     const response = { status: 200, branch };
-    branchLogger.info('Fetched branch by ID', { req: requestInfo, res: response });
+    branchLogger.info("Fetched branch by ID", {
+      req: requestInfo,
+      res: response,
+    });
 
     res.json(response);
   } catch (error) {
-    const response = { status: 500, error: 'Failed to fetch branch. Please try again later.' };
-    branchLogger.error('Error fetching branch by ID', { req: requestInfo, error });
+    const response = {
+      status: 500,
+      error: "Failed to fetch branch. Please try again later.",
+    };
+    branchLogger.error("Error fetching branch by ID", {
+      req: requestInfo,
+      error,
+    });
     res.status(response.status).json(response);
   }
 };
 
 exports.updateBranch = async (req, res) => {
   const performedBy = req.userCIFId;
-  const requestInfo = { method: req.method, url: req.url, body: req.body, params: req.params };
+  const requestInfo = {
+    method: req.method,
+    url: req.url,
+    body: req.body,
+    params: req.params,
+  };
 
   try {
     const { id } = req.params;
@@ -80,8 +120,11 @@ exports.updateBranch = async (req, res) => {
     const branch = await Branch.findByPk(id);
 
     if (!branch) {
-      const response = { status: 404, error: 'Branch not found' };
-      branchLogger.warn('Branch not found', { req: requestInfo, res: response });
+      const response = { status: 404, error: "Branch not found" };
+      branchLogger.warn("Branch not found", {
+        req: requestInfo,
+        res: response,
+      });
       return res.status(response.status).json(response);
     }
 
@@ -96,22 +139,32 @@ exports.updateBranch = async (req, res) => {
 
     // Log the update action
     await AuditLog.create({
-      tableName: 'Branches',
+      tableName: "Branches",
       recordId: branch.id,
-      action: 'UPDATE',
+      action: "UPDATE",
       oldValues: oldValues,
       newValues: newValues,
       performedBy,
-      notes: 'Branch updated successfully.',
+      notes: "Branch updated successfully.",
     });
 
-    const response = { status: 200, message: 'Branch updated successfully', branch };
-    branchLogger.info('Branch updated successfully', { req: requestInfo, res: response });
+    const response = {
+      status: 200,
+      message: "Branch updated successfully",
+      branch,
+    };
+    branchLogger.info("Branch updated successfully", {
+      req: requestInfo,
+      res: response,
+    });
 
     res.json(response);
   } catch (error) {
-    const response = { status: 500, error: 'Failed to update branch. Please try again later.' };
-    branchLogger.error('Error updating branch', { req: requestInfo, error });
+    const response = {
+      status: 500,
+      error: "Failed to update branch. Please try again later.",
+    };
+    branchLogger.error("Error updating branch", { req: requestInfo, error });
     res.status(response.status).json(response);
   }
 };
@@ -125,8 +178,11 @@ exports.deleteBranch = async (req, res) => {
     const branch = await Branch.findByPk(id);
 
     if (!branch) {
-      const response = { status: 404, error: 'Branch not found' };
-      branchLogger.warn('Branch not found', { req: requestInfo, res: response });
+      const response = { status: 404, error: "Branch not found" };
+      branchLogger.warn("Branch not found", {
+        req: requestInfo,
+        res: response,
+      });
       return res.status(response.status).json(response);
     }
 
@@ -139,21 +195,27 @@ exports.deleteBranch = async (req, res) => {
 
     // Log the delete action
     await AuditLog.create({
-      tableName: 'Branches',
+      tableName: "Branches",
       recordId: id,
-      action: 'DELETE',
+      action: "DELETE",
       oldValues: oldValues,
       performedBy,
-      notes: 'Branch deleted successfully.',
+      notes: "Branch deleted successfully.",
     });
 
-    const response = { status: 200, message: 'Branch deleted successfully' };
-    branchLogger.info('Branch deleted successfully', { req: requestInfo, res: response });
+    const response = { status: 200, message: "Branch deleted successfully" };
+    branchLogger.info("Branch deleted successfully", {
+      req: requestInfo,
+      res: response,
+    });
 
     res.json(response);
   } catch (error) {
-    const response = { status: 500, error: 'Failed to delete branch. Please try again later.' };
-    branchLogger.error('Error deleting branch', { req: requestInfo, error });
+    const response = {
+      status: 500,
+      error: "Failed to delete branch. Please try again later.",
+    };
+    branchLogger.error("Error deleting branch", { req: requestInfo, error });
     res.status(response.status).json(response);
   }
 };
@@ -203,14 +265,17 @@ exports.getBranchWithDetails = async (req, res) => {
     });
 
     if (!branchDetails.length) {
-      const response = { status: 404, error: 'Branch not found' };
-      branchLogger.warn('Branch not found', { req: requestInfo, res: response });
+      const response = { status: 404, error: "Branch not found" };
+      branchLogger.warn("Branch not found", {
+        req: requestInfo,
+        res: response,
+      });
       return res.status(response.status).json(response);
     }
 
     // Organize the data
     const organizedData = branchDetails.reduce((acc, row) => {
-      let branch = acc.find(b => b.id === row.branchId);
+      let branch = acc.find((b) => b.id === row.branchId);
       if (!branch) {
         branch = {
           id: row.branchId,
@@ -222,9 +287,9 @@ exports.getBranchWithDetails = async (req, res) => {
         };
         acc.push(branch);
       }
-    
+
       if (row.categoryId) {
-        let category = branch.categories.find(c => c.id === row.categoryId);
+        let category = branch.categories.find((c) => c.id === row.categoryId);
         if (!category) {
           category = {
             id: row.categoryId,
@@ -233,9 +298,11 @@ exports.getBranchWithDetails = async (req, res) => {
           };
           branch.categories.push(category);
         }
-    
+
         if (row.menuItemId) {
-          let existingMenuItem = category.menuItems.find(m => m.id === row.menuItemId);
+          let existingMenuItem = category.menuItems.find(
+            (m) => m.id === row.menuItemId
+          );
           if (!existingMenuItem) {
             category.menuItems.push({
               id: row.menuItemId,
@@ -252,9 +319,9 @@ exports.getBranchWithDetails = async (req, res) => {
           }
         }
       }
-    
+
       if (row.orderId) {
-        let existingOrder = branch.orders.find(o => o.id === row.orderId);
+        let existingOrder = branch.orders.find((o) => o.id === row.orderId);
         if (!existingOrder) {
           branch.orders.push({
             id: row.orderId,
@@ -263,19 +330,28 @@ exports.getBranchWithDetails = async (req, res) => {
           });
         }
       }
-    
+
       return acc;
     }, []);
-    
 
     const response = { status: 200, branch: organizedData[0] };
-    branchLogger.info('Fetched branch with details', { req: requestInfo, res: response });
+    branchLogger.info("Fetched branch with details", {
+      req: requestInfo,
+      res: response,
+    });
 
     res.json(response);
   } catch (error) {
     // Log detailed error
-    branchLogger.error('Error fetching branch with details', { req: requestInfo, error: error.message, stack: error.stack });
-    const response = { status: 500, error: 'Failed to fetch branch details. Please try again later.' };
+    branchLogger.error("Error fetching branch with details", {
+      req: requestInfo,
+      error: error.message,
+      stack: error.stack,
+    });
+    const response = {
+      status: 500,
+      error: "Failed to fetch branch details. Please try again later.",
+    };
     res.status(response.status).json(response);
   }
 };
@@ -328,14 +404,20 @@ exports.filterBranches = async (req, res) => {
     });
 
     if (!branches.length) {
-      const response = { status: 404, error: 'No branches found based on the provided criteria.' };
-      branchLogger.warn('No branches found', { req: requestInfo, res: response });
+      const response = {
+        status: 404,
+        error: "No branches found based on the provided criteria.",
+      };
+      branchLogger.warn("No branches found", {
+        req: requestInfo,
+        res: response,
+      });
       return res.status(response.status).json(response);
     }
 
     // Organize the data
     const organizedData = branches.reduce((acc, row) => {
-      let branch = acc.find(b => b.id === row.branchId);
+      let branch = acc.find((b) => b.id === row.branchId);
       if (!branch) {
         branch = {
           id: row.branchId,
@@ -347,9 +429,9 @@ exports.filterBranches = async (req, res) => {
         };
         acc.push(branch);
       }
-    
+
       if (row.categoryId) {
-        let category = branch.categories.find(c => c.id === row.categoryId);
+        let category = branch.categories.find((c) => c.id === row.categoryId);
         if (!category) {
           category = {
             id: row.categoryId,
@@ -358,9 +440,11 @@ exports.filterBranches = async (req, res) => {
           };
           branch.categories.push(category);
         }
-    
+
         if (row.menuItemId) {
-          let existingMenuItem = category.menuItems.find(m => m.id === row.menuItemId);
+          let existingMenuItem = category.menuItems.find(
+            (m) => m.id === row.menuItemId
+          );
           if (!existingMenuItem) {
             category.menuItems.push({
               id: row.menuItemId,
@@ -377,10 +461,10 @@ exports.filterBranches = async (req, res) => {
           }
         }
       }
-    
+
       if (row.orderId) {
         // ✅ CHECK IF ORDER ALREADY EXISTS
-        let existingOrder = branch.orders.find(o => o.id === row.orderId);
+        let existingOrder = branch.orders.find((o) => o.id === row.orderId);
         if (!existingOrder) {
           branch.orders.push({
             id: row.orderId,
@@ -389,17 +473,26 @@ exports.filterBranches = async (req, res) => {
           });
         }
       }
-    
+
       return acc;
     }, []);
-    
+
     const response = { status: 200, branches: organizedData };
-    branchLogger.info('Filtered branches fetched successfully', { req: requestInfo, res: response });
+    branchLogger.info("Filtered branches fetched successfully", {
+      req: requestInfo,
+      res: response,
+    });
 
     res.status(response.status).json(response);
   } catch (error) {
-    const response = { status: 500, error: 'Failed to filter branches. Please try again later.' };
-    branchLogger.error('Error fetching filtered branches', { req: requestInfo, error: error.message });
+    const response = {
+      status: 500,
+      error: "Failed to filter branches. Please try again later.",
+    };
+    branchLogger.error("Error fetching filtered branches", {
+      req: requestInfo,
+      error: error.message,
+    });
     res.status(response.status).json(response);
   }
 };

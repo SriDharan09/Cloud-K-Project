@@ -11,25 +11,12 @@ const {
 } = require("../controllers/branchController");
 const authMiddleware = require("../middleware/auth");
 const adminAuth = require("../middleware/adminAuth");
-const upload = require("../config/multerConfig");
-const multer = require("multer");
+const createUploadMiddleware = require("../middleware/upload");
+const upload = createUploadMiddleware("branches");
 
-
-const uploadMiddleware = (req, res, next) => {
-  upload.single("main_image")(req, res, function (err) {
-    if (err instanceof multer.MulterError) {
-      console.error("Multer Error:", err);
-      return res.status(400).json({ error: `Multer error: ${err.message}` });
-    } else if (err) {
-      console.error("File upload error:", err);
-      return res.status(400).json({ error: `Upload error: ${err.message}` });
-    }
-    next();
-  });
-};
 
 // Create a new branch
-router.post("/", uploadMiddleware, authMiddleware, adminAuth, createBranch);
+router.post("/", upload.single("main_image"), authMiddleware, adminAuth, createBranch);
 
 // Get all branches
 router.get("/", getBranches);

@@ -18,7 +18,7 @@ const Home = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {branchDetails?.branches?.map((branch) => {
           const imageUrl = branch.mainImage
-            ? `http://localhost:5000/uploads/${branch.mainImage}`
+            ? `${branch.mainImage}`
             : "https://via.placeholder.com/150";
 
           return (

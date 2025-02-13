@@ -1,6 +1,6 @@
-const { sequelize } = require("../models"); // Import sequelize instance
+const { sequelize } = require("../models");
 const { Branch, AuditLog } = require("../models");
-const branchLogger = require("../utils/logger/branchLogger"); // Update the path accordingly
+const branchLogger = require("../utils/logger/branchLogger");
 
 exports.createBranch = async (req, res) => {
   const requestInfo = { method: req.method, url: req.url, body: req.body };
@@ -8,7 +8,12 @@ exports.createBranch = async (req, res) => {
 
   try {
     const { name, address, phone_number } = req.body;
-    const main_image = req.file ? req.file.filename : null;
+    console.log(req.file);
+    if (!req.file) {
+      console.error("🔴 No file uploaded!");
+      return res.status(400).json({ error: "No file uploaded" });
+  }
+    const main_image = req.file ? req.file.path : null;
 
     const branch = await Branch.create({
       name,

@@ -1,6 +1,6 @@
-const { Category,AuditLog } = require('../models');
-const { Op } = require('sequelize');
-const categoryLogger = require('../utils/logger/categoryLogger'); // Update the path if needed
+const { Category, AuditLog } = require("../models");
+const { Op } = require("sequelize");
+const categoryLogger = require("../utils/logger/categoryLogger"); // Update the path if needed
 
 exports.createCategory = async (req, res) => {
   const requestInfo = { method: req.method, url: req.url, body: req.body };
@@ -8,24 +8,38 @@ exports.createCategory = async (req, res) => {
 
   try {
     const { name } = req.body;
-    const category = await Category.create({ name });
+    if (!req.file) {
+      console.error("🔴 No file uploaded!");
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    const categoryImage = req.file ? req.file.path : null;
+    const category = await Category.create({ name, categoryImage });
+    console.log(req.file);
 
     // Log the creation action
     await AuditLog.create({
-      tableName: 'Categories',
+      tableName: "Categories",
       recordId: category.id,
-      action: 'CREATE',
+      action: "CREATE",
       newValues: category.dataValues,
       performedBy,
-      notes: 'Category created successfully.',
+      notes: "Category created successfully.",
     });
 
-    categoryLogger.info('Category created successfully', { req: requestInfo, performedBy });
+    categoryLogger.info("Category created successfully", {
+      req: requestInfo,
+      performedBy,
+    });
     res.status(201).json(category);
   } catch (error) {
     // Improved error logging
-    categoryLogger.error('Error creating category', { req: requestInfo, error: error.message || error });
-    res.status(400).json({ error: error.message || 'An error occurred while creating the category.' });
+    categoryLogger.error("Error creating category", {
+      req: requestInfo,
+      error: error.message || error,
+    });
+    res.status(400).json({
+      error: error.message || "An error occurred while creating the category.",
+    });
   }
 };
 exports.getCategories = async (req, res) => {
@@ -46,19 +60,28 @@ exports.getCategories = async (req, res) => {
 
     const response = {
       status: 200,
-      message: 'Fetched categories successfully',
+      message: "Fetched categories successfully",
       total: count,
       pages: Math.ceil(count / limit),
       currentPage: parseInt(page, 10),
       limit: parseInt(limit, 10),
       categories,
     };
-    categoryLogger.info('Fetched categories successfully', { req: requestInfo, res: response });
+    categoryLogger.info("Fetched categories successfully", {
+      req: requestInfo,
+      res: response,
+    });
 
     res.json(response);
   } catch (error) {
-    const response = { status: 400, error: 'Failed to fetch categories. Please try again later.' };
-    categoryLogger.error('Error fetching categories', { req: requestInfo, error });
+    const response = {
+      status: 400,
+      error: "Failed to fetch categories. Please try again later.",
+    };
+    categoryLogger.error("Error fetching categories", {
+      req: requestInfo,
+      error,
+    });
     res.status(response.status).json(response);
   }
 };
@@ -68,24 +91,41 @@ exports.getCategoryById = async (req, res) => {
   try {
     const category = await Category.findByPk(req.params.id);
     if (!category) {
-      const response = { status: 404, error: 'Category not found' };
-      categoryLogger.warn('Category not found', { req: requestInfo, res: response });
+      const response = { status: 404, error: "Category not found" };
+      categoryLogger.warn("Category not found", {
+        req: requestInfo,
+        res: response,
+      });
       return res.status(response.status).json(response);
     }
 
     const response = { status: 200, category };
-    categoryLogger.info('Fetched category by ID successfully', { req: requestInfo, res: response });
+    categoryLogger.info("Fetched category by ID successfully", {
+      req: requestInfo,
+      res: response,
+    });
 
     res.json(response);
   } catch (error) {
-    const response = { status: 400, error: 'Failed to fetch category. Please try again later.' };
-    categoryLogger.error('Error fetching category by ID', { req: requestInfo, error });
+    const response = {
+      status: 400,
+      error: "Failed to fetch category. Please try again later.",
+    };
+    categoryLogger.error("Error fetching category by ID", {
+      req: requestInfo,
+      error,
+    });
     res.status(response.status).json(response);
   }
 };
 
 exports.updateCategory = async (req, res) => {
-  const requestInfo = { method: req.method, url: req.url, body: req.body, params: req.params };
+  const requestInfo = {
+    method: req.method,
+    url: req.url,
+    body: req.body,
+    params: req.params,
+  };
   const performedBy = req.userCIFId;
 
   try {
@@ -93,8 +133,11 @@ exports.updateCategory = async (req, res) => {
     const category = await Category.findByPk(req.params.id);
 
     if (!category) {
-      const response = { status: 404, error: 'Category not found' };
-      categoryLogger.warn('Category not found for update', { req: requestInfo, res: response });
+      const response = { status: 404, error: "Category not found" };
+      categoryLogger.warn("Category not found for update", {
+        req: requestInfo,
+        res: response,
+      });
       return res.status(response.status).json(response);
     }
 
@@ -107,26 +150,38 @@ exports.updateCategory = async (req, res) => {
     // Clone new values after saving
     const newValues = { ...category.dataValues };
 
-
     // Log the update action
     await AuditLog.create({
-      tableName: 'Categories',
+      tableName: "Categories",
       recordId: category.id,
-      action: 'UPDATE',
+      action: "UPDATE",
       oldValues,
       newValues,
       changes: { name: { old: oldValues.name, new: name } },
       performedBy,
-      notes: 'Category updated successfully.',
+      notes: "Category updated successfully.",
     });
 
-    const response = { status: 200, message: 'Category updated successfully', category };
-    categoryLogger.info('Category updated successfully', { req: requestInfo, res: response });
+    const response = {
+      status: 200,
+      message: "Category updated successfully",
+      category,
+    };
+    categoryLogger.info("Category updated successfully", {
+      req: requestInfo,
+      res: response,
+    });
 
     res.json(response);
   } catch (error) {
-    const response = { status: 400, error: 'Failed to update category. Please try again later.' };
-    categoryLogger.error('Error updating category', { req: requestInfo, error });
+    const response = {
+      status: 400,
+      error: "Failed to update category. Please try again later.",
+    };
+    categoryLogger.error("Error updating category", {
+      req: requestInfo,
+      error,
+    });
     res.status(response.status).json(response);
   }
 };
@@ -139,31 +194,43 @@ exports.deleteCategory = async (req, res) => {
     const category = await Category.findByPk(req.params.id);
 
     if (!category) {
-      const response = { status: 404, error: 'Category not found' };
-      categoryLogger.warn('Category not found for deletion', { req: requestInfo, res: response });
+      const response = { status: 404, error: "Category not found" };
+      categoryLogger.warn("Category not found for deletion", {
+        req: requestInfo,
+        res: response,
+      });
       return res.status(response.status).json(response);
     }
 
-    const oldValues = { ...category.dataValues }
+    const oldValues = { ...category.dataValues };
     await category.destroy();
 
     // Log the delete action
     await AuditLog.create({
-      tableName: 'Categories',
+      tableName: "Categories",
       recordId: category.id,
-      action: 'DELETE',
+      action: "DELETE",
       oldValues,
       performedBy,
-      notes: 'Category deleted successfully.',
+      notes: "Category deleted successfully.",
     });
 
-    const response = { status: 200, message: 'Category deleted successfully' };
-    categoryLogger.info('Category deleted successfully', { req: requestInfo, res: response });
+    const response = { status: 200, message: "Category deleted successfully" };
+    categoryLogger.info("Category deleted successfully", {
+      req: requestInfo,
+      res: response,
+    });
 
     res.json(response);
   } catch (error) {
-    const response = { status: 400, error: 'Failed to delete category. Please try again later.' };
-    categoryLogger.error('Error deleting category', { req: requestInfo, error });
+    const response = {
+      status: 400,
+      error: "Failed to delete category. Please try again later.",
+    };
+    categoryLogger.error("Error deleting category", {
+      req: requestInfo,
+      error,
+    });
     res.status(response.status).json(response);
   }
 };
@@ -171,7 +238,7 @@ exports.deleteCategory = async (req, res) => {
 exports.searchCategories = async (req, res) => {
   const { q } = req.query;
   const requestInfo = { method: req.method, url: req.url, query: req.query };
-  
+
   try {
     const categories = await Category.findAll({
       where: {
@@ -182,18 +249,30 @@ exports.searchCategories = async (req, res) => {
     });
 
     if (!categories.length) {
-      const response = { status: 404, error: 'Category not found' };
-      categoryLogger.warn('Category search returned no results', { req: requestInfo, res: response });
+      const response = { status: 404, error: "Category not found" };
+      categoryLogger.warn("Category search returned no results", {
+        req: requestInfo,
+        res: response,
+      });
       return res.status(response.status).json(response);
     }
 
     const response = { status: 200, categories };
-    categoryLogger.info('Category search completed successfully', { req: requestInfo, res: response });
+    categoryLogger.info("Category search completed successfully", {
+      req: requestInfo,
+      res: response,
+    });
 
     res.json(response);
   } catch (error) {
-    const response = { status: 500, error: 'Failed to search categories. Please try again later.' };
-    categoryLogger.error('Error searching categories', { req: requestInfo, error });
+    const response = {
+      status: 500,
+      error: "Failed to search categories. Please try again later.",
+    };
+    categoryLogger.error("Error searching categories", {
+      req: requestInfo,
+      error,
+    });
     res.status(response.status).json(response);
   }
 };

@@ -19,5 +19,9 @@ export const getBranchDetails = async () => {
           "Something went wrong",
       };
     }
+    return {
+      success: false,
+      message: "Network error. Please try again later.",
+    };
   }
 };

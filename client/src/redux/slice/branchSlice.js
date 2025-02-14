@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getBranchDetails } from "../../api/brnachApi";
+import { getBranchDetails } from "../../api/branchApi";
 
 const initialState = {
   statusCode: null,
@@ -34,11 +34,13 @@ const branchSlice = createSlice({
       })
       .addCase(fetchBranchDetails.fulfilled, (state, action) => {
         state.loading = false;
+        state.statusCode = action.payload.status;
         state.branchDetails = action.payload;
       })
       .addCase(fetchBranchDetails.rejected, (state, action) => {
         state.loading = false;
         state.branchDetails = [];
+        state.statusCode = action.payload.status;
         state.error = action.payload;
       });
   },

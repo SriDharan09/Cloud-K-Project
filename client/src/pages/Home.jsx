@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchBranchDetails } from "../redux/slice/branchSlice";
+import { fetchCategoryDetails } from "./../redux/slice/categorySlice";
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -8,6 +9,7 @@ const Home = () => {
 
   useEffect(() => {
     dispatch(fetchBranchDetails());
+    dispatch(fetchCategoryDetails());
   }, [dispatch]);
 
   return (

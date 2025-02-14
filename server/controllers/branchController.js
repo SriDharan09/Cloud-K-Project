@@ -58,7 +58,8 @@ exports.getBranches = async (req, res) => {
 
   try {
     const branches = await Branch.findAll();
-    const response = { status: 200, branches };
+    const response = { status: 200,message: 'Fetched Branch successfully',
+      branches };
     branchLogger.info("Fetched all branches", {
       req: requestInfo,
       res: response,

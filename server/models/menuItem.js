@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const MenuItem = sequelize.define('MenuItem', {
+  const MenuItem = sequelize.define("MenuItem", {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -19,12 +19,12 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     status: {
-      type: DataTypes.ENUM('AVAILABLE', 'SOLD_OUT', 'DISCONTINUED'),
-      defaultValue: 'AVAILABLE',
+      type: DataTypes.ENUM("AVAILABLE", "SOLD_OUT", "DISCONTINUED"),
+      defaultValue: "AVAILABLE",
     },
-    imageUrl: {
+    menuImage: {
       type: DataTypes.STRING,
-      allowNull: true, // Allow NULL values
+      allowNull: true,
     },
     rating: {
       type: DataTypes.DECIMAL(2, 1),

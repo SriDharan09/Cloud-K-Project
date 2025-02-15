@@ -13,12 +13,16 @@ exports.createMenuItem = async (req, res) => {
       CategoryId,
       BranchId,
       status,
-      imageUrl,
       rating,
       preparationTime,
       isSpecial,
       discountPrice,
     } = req.body;
+    if (!req.file) {
+      console.error("🔴 No file uploaded!");
+      // return res.status(400).json({ error: "No file uploaded" });
+      }
+    const menuImage = req.file ? req.file.path : null;
     const menuItem = await MenuItem.create({
       name,
       description,
@@ -26,7 +30,7 @@ exports.createMenuItem = async (req, res) => {
       CategoryId,
       BranchId,
       status,
-      imageUrl,
+      menuImage,
       rating,
       preparationTime,
       isSpecial,
@@ -61,7 +65,9 @@ exports.createMenuItem = async (req, res) => {
 exports.getMenuItems = async (req, res) => {
   try {
     const menuItems = await MenuItem.findAll({ include: [Category, Branch] });
-    res.json(menuItems);
+    const response={ status: 200,message: 'Fetched Branch successfully',menuItems};
+    menuItemLogger.info("Fetched menu items", { response });
+    res.status(response.status).json(response);
   } catch (error) {
     menuItemLogger.error("Error fetching menu items", { error });
     res.status(400).json({ error: error.message });
@@ -232,11 +238,9 @@ exports.getMenuByOther = async (req, res) => {
 
     // Check if data exists
     if (!menuItems.length) {
-      return res
-        .status(404)
-        .json({
-          message: "No menu items found for the given branch and category.",
-        });
+      return res.status(404).json({
+        message: "No menu items found for the given branch and category.",
+      });
     }
 
     res.json(menuItems);

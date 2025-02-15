@@ -5,7 +5,7 @@ const initialState = {
   statusCode: null,
   loading: false,
   error: null,
-  categories: [],
+  categoryDetails: [],
 };
 
 export const fetchCategoryDetails = createAsyncThunk(
@@ -34,11 +34,11 @@ const categorySlice = createSlice({
       builder.addCase(fetchCategoryDetails.fulfilled, (state, action) => {
         state.loading = false;
         state.statusCode = action.payload.status;
-        state.categories = action.payload;
+        state.categoryDetails = action.payload;
       }),
       builder.addCase(fetchCategoryDetails.rejected, (state, action) => {
         state.loading = false;
-        state.categories = [];
+        state.categoryDetails = [];
         state.statusCode = action.payload.status;
         state.error = action.payload;
       });

@@ -13,7 +13,69 @@ import AsyncModal from "../components/Modal/AsyncModal";
 import { userVerification } from "../api/authApi";
 import { useLoader } from "../context/LoaderContext";
 import "../styles/Login.css";
-import { Steps } from "antd";
+import { Stepper, Step, StepLabel } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import Check from "@mui/icons-material/Check";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
+import StepConnector, { stepConnectorClasses } from "@mui/material/StepConnector";
+const steps = ["Register", "Verify Email"];
+
+const ColorlibConnector = styled(StepConnector)(({ theme }) => ({
+  [`&.${stepConnectorClasses.alternativeLabel}`]: {
+    top: 22,
+  },
+  [`&.${stepConnectorClasses.active}`]: {
+    [`& .${stepConnectorClasses.line}`]: {
+      backgroundImage: "linear-gradient( 95deg,#f27121 0%,#e94057 50%,#8a2387 100%)",
+    },
+  },
+  [`&.${stepConnectorClasses.completed}`]: {
+    [`& .${stepConnectorClasses.line}`]: {
+      backgroundImage: "linear-gradient( 95deg,#f27121 0%,#e94057 50%,#8a2387 100%)",
+    },
+  },
+  [`& .${stepConnectorClasses.line}`]: {
+    height: 3,
+    border: 0,
+    backgroundColor: "#eaeaf0",
+    borderRadius: 1,
+  },
+}));
+
+const ColorlibStepIconRoot = styled("div")(({ ownerState }) => ({
+  backgroundColor: "#ccc",
+  zIndex: 1,
+  color: "#fff",
+  width: 50,
+  height: 50,
+  display: "flex",
+  borderRadius: "50%",
+  justifyContent: "center",
+  alignItems: "center",
+  ...(ownerState.active && {
+    backgroundImage: "linear-gradient(136deg, #f27121 0%, #e94057 50%, #8a2387 100%)",
+    boxShadow: "0 4px 10px 0 rgba(0,0,0,.25)",
+  }),
+  ...(ownerState.completed && {
+    backgroundImage: "linear-gradient(136deg, #f27121 0%, #e94057 50%, #8a2387 100%)",
+  }),
+}));
+
+function ColorlibStepIcon(props) {
+  const { active, completed, className } = props;
+
+  const icons = {
+    1: <PersonAddIcon />,
+    2: <VerifiedUserIcon />,
+  };
+
+  return (
+    <ColorlibStepIconRoot ownerState={{ completed, active }} className={className}>
+      {completed ? <Check /> : icons[String(props.icon)]}
+    </ColorlibStepIconRoot>
+  );
+}
 
 const Login = () => {
   const { showLoader, hideLoader } = useLoader();
@@ -23,9 +85,10 @@ const Login = () => {
   const [mode, setMode] = useState("login");
   const [fullName, setFullName] = useState("");
   const [repeatpassword, setRepeatpassword] = useState("");
-  const [currentStep, setCurrentStep] = useState(0);
   const [verificationCode, setVerificationCode] = useState("");
   const StoredEmail = useSelector((state) => state.auth.email);
+  const [currentStep, setCurrentStep] = useState(0);
+
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -101,26 +164,17 @@ const Login = () => {
     <div>
       <div className={`form-block-wrapper form-block-wrapper--is-${mode}`} />
       <section className={`form-block form-block--is-${mode}`}>
-        {mode === "signup" && (
-          <div className="py-2">
-            <Steps
-              className="custom-steps"
-              current={currentStep}
-              items={[
-                {
-                  title: "Register",
-                  status: currentStep >= 1 ? "finish" : "process",
-                  icon: <UserOutlined />,
-                },
-                {
-                  title: "Verify Email",
-                  status: currentStep === 2 ? "finish" : "wait",
-                  icon: <SolutionOutlined />,
-                },
-              ]}
-            />
-          </div>
-        )}
+      {mode === "signup" && (
+        <div className="py-2">
+          <Stepper alternativeLabel activeStep={currentStep} connector={<ColorlibConnector />}>
+            {steps.map((label, index) => (
+              <Step key={label}>
+                <StepLabel StepIconComponent={ColorlibStepIcon}>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+        </div>
+      )}
 
         <header className="form-block__header">
           <h1>{mode === "login" ? "Welcome back!" : "Sign up"}</h1>
@@ -173,3 +227,5 @@ const Login = () => {
 };
 
 export default Login;
+
+

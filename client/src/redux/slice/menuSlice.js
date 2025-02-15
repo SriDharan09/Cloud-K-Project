@@ -5,7 +5,7 @@ const initialState = {
   statusCode: null,
   loading: false,
   error: null,
-  menus: [],
+  menuDetails: [],
 };
 export const fetchMenuDetails = createAsyncThunk(
   "menu/getMenuDetails",
@@ -34,11 +34,11 @@ const menuSlice = createSlice({
       .addCase(fetchMenuDetails.fulfilled, (state, action) => {
         state.loading = false;
         state.statusCode = action.payload.status;
-        state.menus = action.payload;
+        state.menuDetails = action.payload;
       })
       .addCase(fetchMenuDetails.rejected, (state, action) => {
         state.loading = false;
-        state.menus = [];
+        state.menuDetails = [];
         state.statusCode = action.payload.status;
         state.error = action.payload;
       });

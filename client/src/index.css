@@ -1,1 +1,6 @@
     @import "tailwindcss";
+
+    body {
+        background: linear-gradient(to bottom, #f8f9fa, #e9ecef); /* Light Grayish */
+        color: #333; /* Dark text for readability */
+      }

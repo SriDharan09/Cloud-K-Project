@@ -6,6 +6,7 @@ import AppRoutes from "./routes/AppRoutes";
 import { NotificationProvider } from "./context/NotificationProvider";
 import { LoaderProvider } from "./context/LoaderContext";
 import "./index.css";
+import ErrorBoundary from "./context/ErrorBoundary";
 
 function App() {
   const dispatch = useDispatch();
@@ -21,11 +22,13 @@ function App() {
 
   return (
     <Router>
-      <LoaderProvider>
-        <NotificationProvider>
-          <AppRoutes />
-        </NotificationProvider>
-      </LoaderProvider>
+      <ErrorBoundary>
+        <LoaderProvider>
+          <NotificationProvider>
+            <AppRoutes />
+          </NotificationProvider>
+        </LoaderProvider>
+      </ErrorBoundary>
     </Router>
   );
 }

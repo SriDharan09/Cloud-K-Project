@@ -21,7 +21,7 @@ export const LoaderProvider = ({ children }) => {
 export const useLoader = () => useContext(LoaderContext);
 
 const FullScreenLoader = () => (
-  <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-[2px] z-50">
+  <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-[2px] z-[9999]">
     <Spin size="large" />
   </div>
 );

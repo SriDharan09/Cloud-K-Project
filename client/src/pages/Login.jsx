@@ -18,7 +18,9 @@ import { styled } from "@mui/material/styles";
 import Check from "@mui/icons-material/Check";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
-import StepConnector, { stepConnectorClasses } from "@mui/material/StepConnector";
+import StepConnector, {
+  stepConnectorClasses,
+} from "@mui/material/StepConnector";
 const steps = ["Register", "Verify Email"];
 
 const ColorlibConnector = styled(StepConnector)(({ theme }) => ({
@@ -27,12 +29,14 @@ const ColorlibConnector = styled(StepConnector)(({ theme }) => ({
   },
   [`&.${stepConnectorClasses.active}`]: {
     [`& .${stepConnectorClasses.line}`]: {
-      backgroundImage: "linear-gradient( 95deg,#f27121 0%,#e94057 50%,#8a2387 100%)",
+      backgroundImage:
+        "linear-gradient( 95deg,#f27121 0%,#e94057 50%,#8a2387 100%)",
     },
   },
   [`&.${stepConnectorClasses.completed}`]: {
     [`& .${stepConnectorClasses.line}`]: {
-      backgroundImage: "linear-gradient( 95deg,#f27121 0%,#e94057 50%,#8a2387 100%)",
+      backgroundImage:
+        "linear-gradient( 95deg,#f27121 0%,#e94057 50%,#8a2387 100%)",
     },
   },
   [`& .${stepConnectorClasses.line}`]: {
@@ -54,11 +58,13 @@ const ColorlibStepIconRoot = styled("div")(({ ownerState }) => ({
   justifyContent: "center",
   alignItems: "center",
   ...(ownerState.active && {
-    backgroundImage: "linear-gradient(136deg, #f27121 0%, #e94057 50%, #8a2387 100%)",
+    backgroundImage:
+      "linear-gradient(136deg, #f27121 0%, #e94057 50%, #8a2387 100%)",
     boxShadow: "0 4px 10px 0 rgba(0,0,0,.25)",
   }),
   ...(ownerState.completed && {
-    backgroundImage: "linear-gradient(136deg, #f27121 0%, #e94057 50%, #8a2387 100%)",
+    backgroundImage:
+      "linear-gradient(136deg, #f27121 0%, #e94057 50%, #8a2387 100%)",
   }),
 }));
 
@@ -71,13 +77,16 @@ function ColorlibStepIcon(props) {
   };
 
   return (
-    <ColorlibStepIconRoot ownerState={{ completed, active }} className={className}>
+    <ColorlibStepIconRoot
+      ownerState={{ completed, active }}
+      className={className}
+    >
       {completed ? <Check /> : icons[String(props.icon)]}
     </ColorlibStepIconRoot>
   );
 }
 
-const Login = () => {
+const Login = ({ closeModal,isModalOpen }) => {
   const { showLoader, hideLoader } = useLoader();
   const openNotification = useNotification();
   const [email, setEmail] = useState("");
@@ -88,17 +97,7 @@ const Login = () => {
   const [verificationCode, setVerificationCode] = useState("");
   const StoredEmail = useSelector((state) => state.auth.email);
   const [currentStep, setCurrentStep] = useState(0);
-
-
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { user } = useSelector((state) => state.auth);
-
-  useEffect(() => {
-    if (user) {
-      navigate("/");
-    }
-  }, [user, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -142,6 +141,7 @@ const Login = () => {
     });
     if (result?.status === 200 || result?.status === 201) {
       setVerificationCode("");
+      closeModal();
       openNotification(result?.status, result?.title, result?.message);
       setCurrentStep(2);
     } else {
@@ -159,40 +159,68 @@ const Login = () => {
     setCurrentStep(0);
     setMode((prevMode) => (prevMode === "login" ? "signup" : "login"));
   };
+  const resetForm = () => {
+    setEmail("");
+    setPassword("");
+    setFullName("");
+    setRepeatpassword("");
+    setVerificationCode("");
+    setCurrentStep(-1);
+    setMode("login");
+    dispatch(setUserEmail(""));
+  };
+
+  useEffect(() => {
+    if (isModalOpen) {
+      resetForm();
+    }
+  }, [isModalOpen]);
 
   return (
     <div>
+      <button
+        onClick={()=>{closeModal();resetForm();}}
+        className="absolute top-2.5 login_close right-3.5 text-xl text-gray-600 hover:text-black"
+      >
+        ✖
+      </button>
       <div className={`form-block-wrapper form-block-wrapper--is-${mode}`} />
       <section className={`form-block form-block--is-${mode}`}>
-      {mode === "signup" && (
-        <div className="py-2">
-          <Stepper alternativeLabel activeStep={currentStep} connector={<ColorlibConnector />}>
-            {steps.map((label, index) => (
-              <Step key={label}>
-                <StepLabel StepIconComponent={ColorlibStepIcon}>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-        </div>
-      )}
+        {mode === "signup" && (
+          <div className="py-2">
+            <Stepper
+              alternativeLabel
+              activeStep={currentStep}
+              connector={<ColorlibConnector />}
+            >
+              {steps.map((label, index) => (
+                <Step key={label}>
+                  <StepLabel StepIconComponent={ColorlibStepIcon}>
+                    {label}
+                  </StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+          </div>
+        )}
 
         <header className="form-block__header">
           <h1>{mode === "login" ? "Welcome back!" : "Sign up"}</h1>
-          {currentStep === 0 && (
-            <div className="form-block__toggle-block">
-              <span id="toggle-text">
-                {mode === "login" ? "Don't" : "Already"} have an account? Click
-                here &#8594;
-              </span>
-              <input
-                id="form-toggler"
-                type="checkbox"
-                checked={mode === "signup"}
-                onChange={toggleMode}
-              />
-              <label htmlFor="form-toggler"></label>
-            </div>
-          )}
+          {/* {currentStep === 0 && ( */}
+          <div className="form-block__toggle-block">
+            <span id="toggle-text">
+              {mode === "login" ? "Don't" : "Already"} have an account? Click
+              here &#8594;
+            </span>
+            <input
+              id="form-toggler"
+              type="checkbox"
+              checked={mode === "signup"}
+              onChange={toggleMode}
+            />
+            <label htmlFor="form-toggler"></label>
+          </div>
+          {/* )} */}
         </header>
 
         {currentStep === 0 ? (
@@ -227,5 +255,3 @@ const Login = () => {
 };
 
 export default Login;
-
-

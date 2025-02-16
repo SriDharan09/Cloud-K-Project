@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchBranchDetails } from "../redux/slice/branchSlice";
 import { fetchCategoryDetails } from "./../redux/slice/categorySlice";
@@ -10,15 +10,17 @@ import CategoryList from "./../components/CategoryList";
 import MenuList from "./../components/MenuList";
 import Testimonials from "../components/Testimonials";
 import Footer from "../components/Footer";
+import { Modal } from "antd";
+import Login from "./Login";
+
 
 const Home = () => {
   const dispatch = useDispatch();
   const branchDetails = useSelector((state) => state.branch.branchDetails);
-  const categoryDetails = useSelector(
-    (state) => state.category.categoryDetails
-  );
+  const categoryDetails = useSelector((state) => state.category.categoryDetails);
   const menuDetails = useSelector((state) => state.menu.menuDetails);
-  console.log(menuDetails.menuItems);
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     dispatch(fetchBranchDetails());
@@ -28,13 +30,26 @@ const Home = () => {
 
   return (
     <>
-      <Navbar />
+      <Navbar openModal={() => setIsModalOpen(true)} /> {/* Pass openModal to Navbar */}
       <HeroSection />
       <BranchList branches={branchDetails.branches} />
       <CategoryList categories={categoryDetails.categories} />
       <MenuList menuItems={menuDetails.menuItems} />
       <Testimonials />
       <Footer />
+
+      {/* Login/Signup Modal */}
+      <Modal
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        footer={null}
+        centered
+        width={500}
+        className="absolute inset-0 flex items-center w-90! justify-center backdrop-blur-[4px] bg-white/20 text-black z-10"
+      >
+        <Login closeModal={() => setIsModalOpen(false)} isModalOpen={isModalOpen} />
+      </Modal>
+
     </>
   );
 };

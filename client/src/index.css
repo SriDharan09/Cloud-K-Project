@@ -1,6 +1,10 @@
     @import "tailwindcss";
 
-    body {
-        background: linear-gradient(to bottom, #f8f9fa, #e9ecef); /* Light Grayish */
-        color: #333; /* Dark text for readability */
-      }
+
+    html,body {
+      font-family: "Open Sans", sans-serif;
+      font-size: 16px;
+      color: red;
+      margin: 0 !important;
+    }
+    

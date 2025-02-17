@@ -1,11 +1,12 @@
 import React from "react";
+import banner from "../../assets/images/hero_banner.jpg";
 
 const HeroSection = () => {
   return (
     <div className="relative w-full h-[400px] bg-gray-900 flex items-center justify-center text-white">
       {/* Background Image */}
       <img
-        src="https://templately.com/_next/image?url=https%3A%2F%2Fitems.templately.com%2Fitem-8b31085bf557e6eb11bef3ee1052dcf9%2Fget-pizza-hero-section-for-gutenberg-banner-sxF9c3n.jpg&w=2048&q=75"
+        src={banner}
         alt="Hero Banner"
         className="absolute inset-0 w-full h-full object-cover opacity-60"
       />

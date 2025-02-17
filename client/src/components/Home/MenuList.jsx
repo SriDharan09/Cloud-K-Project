@@ -1,6 +1,6 @@
 import React from "react";
 import { Card } from "antd";
-import placeHolder from "../assets/images/Foods_placeHolder.png";
+import placeHolder from "../../assets/images/Foods_placeHolder.png";
 
 const MenuList = ({ menuItems }) => {
   if (!menuItems || menuItems.length === 0) {

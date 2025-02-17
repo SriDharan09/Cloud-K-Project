@@ -9,6 +9,8 @@ import Badge from '@mui/material/Badge';
 import { styled } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import { useModal } from "../context/ModalContext";
+
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   '& .MuiBadge-badge': {
@@ -19,7 +21,9 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
   },
 }));
 
-const Navbar = ({ openModal }) => {
+const Navbar = () => {
+  const { openModal } = useModal(); 
+
   return (
     <nav className="bg-white shadow-md p-4 flex items-center justify-between">
       {/* Brand Logo - Links to Home */}

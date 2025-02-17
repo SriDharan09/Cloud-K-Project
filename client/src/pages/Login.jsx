@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { SolutionOutlined, UserOutlined } from "@ant-design/icons";
 import {
   loginAsync,
   setUserEmail,
@@ -86,7 +84,8 @@ function ColorlibStepIcon(props) {
   );
 }
 
-const Login = ({ closeModal,isModalOpen }) => {
+
+const Login = ({ closeModal, isModalOpen }) => {
   const { showLoader, hideLoader } = useLoader();
   const openNotification = useNotification();
   const [email, setEmail] = useState("");
@@ -165,7 +164,7 @@ const Login = ({ closeModal,isModalOpen }) => {
     setFullName("");
     setRepeatpassword("");
     setVerificationCode("");
-    setCurrentStep(-1);
+    setCurrentStep(0);
     setMode("login");
     dispatch(setUserEmail(""));
   };
@@ -179,7 +178,10 @@ const Login = ({ closeModal,isModalOpen }) => {
   return (
     <div>
       <button
-        onClick={()=>{closeModal();resetForm();}}
+        onClick={() => {
+          closeModal();
+          resetForm();
+        }}
         className="absolute top-2.5 login_close right-3.5 text-xl text-gray-600 hover:text-black"
       >
         ✖
@@ -206,21 +208,21 @@ const Login = ({ closeModal,isModalOpen }) => {
 
         <header className="form-block__header">
           <h1>{mode === "login" ? "Welcome back!" : "Sign up"}</h1>
-          {/* {currentStep === 0 && ( */}
-          <div className="form-block__toggle-block">
-            <span id="toggle-text">
-              {mode === "login" ? "Don't" : "Already"} have an account? Click
-              here &#8594;
-            </span>
-            <input
-              id="form-toggler"
-              type="checkbox"
-              checked={mode === "signup"}
-              onChange={toggleMode}
-            />
-            <label htmlFor="form-toggler"></label>
-          </div>
-          {/* )} */}
+          {currentStep === 0 && (
+            <div className="form-block__toggle-block">
+              <span id="toggle-text">
+                {mode === "login" ? "Don't" : "Already"} have an account? Click
+                here &#8594;
+              </span>
+              <input
+                id="form-toggler"
+                type="checkbox"
+                checked={mode === "signup"}
+                onChange={toggleMode}
+              />
+              <label htmlFor="form-toggler"></label>
+            </div>
+          )}
         </header>
 
         {currentStep === 0 ? (

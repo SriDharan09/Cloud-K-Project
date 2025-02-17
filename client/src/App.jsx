@@ -3,10 +3,18 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { setUser } from "./redux/slice/authSlice";
 import AppRoutes from "./routes/AppRoutes";
+
+// Context Providers
 import { NotificationProvider } from "./context/NotificationProvider";
 import { LoaderProvider } from "./context/LoaderContext";
-import "./index.css";
+import { ModalProvider } from "./context/ModalContext";
 import ErrorBoundary from "./context/ErrorBoundary";
+
+// Global Components
+import Layout from "./components/Layout";
+
+// Styles
+import "./index.css";
 
 function App() {
   const dispatch = useDispatch();
@@ -25,7 +33,11 @@ function App() {
       <ErrorBoundary>
         <LoaderProvider>
           <NotificationProvider>
-            <AppRoutes />
+            <ModalProvider>
+              <Layout>
+                <AppRoutes />
+              </Layout>
+            </ModalProvider>
           </NotificationProvider>
         </LoaderProvider>
       </ErrorBoundary>

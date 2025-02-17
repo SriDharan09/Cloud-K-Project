@@ -12,7 +12,10 @@ const Testimonials = () => {
         ⭐ Testimonials
       </h2>
       {testimonials.map((testimony) => (
-        <div key={testimony.id} className="p-4 border rounded-md mb-2 bg-gray-200">
+        <div
+          key={testimony.id}
+          className="p-4 border rounded-md mb-2 bg-gray-200"
+        >
           <p className="text-black">“{testimony.review}”</p>
           <p className="text-gray-500">- {testimony.name}</p>
         </div>

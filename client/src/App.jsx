@@ -29,8 +29,8 @@ function App() {
   }, [dispatch]);
 
   return (
-    <Router>
-      <ErrorBoundary>
+    <ErrorBoundary>
+      <Router>
         <LoaderProvider>
           <NotificationProvider>
             <ModalProvider>
@@ -40,8 +40,8 @@ function App() {
             </ModalProvider>
           </NotificationProvider>
         </LoaderProvider>
-      </ErrorBoundary>
-    </Router>
+      </Router>
+    </ErrorBoundary>
   );
 }
 

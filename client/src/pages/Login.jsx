@@ -20,6 +20,7 @@ import StepConnector, {
   stepConnectorClasses,
 } from "@mui/material/StepConnector";
 const steps = ["Register", "Verify Email"];
+import { useModal } from "../context/ModalContext";
 
 const ColorlibConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
@@ -84,8 +85,8 @@ function ColorlibStepIcon(props) {
   );
 }
 
-
-const Login = ({ closeModal, isModalOpen }) => {
+const Login = () => {
+  const { closeModal, isModalOpen } = useModal();
   const { showLoader, hideLoader } = useLoader();
   const openNotification = useNotification();
   const [email, setEmail] = useState("");
@@ -101,8 +102,11 @@ const Login = ({ closeModal, isModalOpen }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     const result = await dispatch(loginAsync({ email, password }));
-    console.log(result);
+    console.log(result.payload);
     if (result?.payload) {
+      if (result.payload.status === 200 || result.payload.status === 201) {
+        closeModal();
+      }
       openNotification(
         result.payload.status,
         result.payload.title,
@@ -210,7 +214,7 @@ const Login = ({ closeModal, isModalOpen }) => {
           <h1>{mode === "login" ? "Welcome back!" : "Sign up"}</h1>
           {currentStep === 0 && (
             <div className="form-block__toggle-block">
-              <span id="toggle-text">
+              <span id="toggle-text font-medium">
                 {mode === "login" ? "Don't" : "Already"} have an account? Click
                 here &#8594;
               </span>

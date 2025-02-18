@@ -12,7 +12,7 @@ exports.createBranch = async (req, res) => {
     if (!req.file) {
       console.error("🔴 No file uploaded!");
       return res.status(400).json({ error: "No file uploaded" });
-  }
+    }
     const main_image = req.file ? req.file.path : null;
 
     const branch = await Branch.create({
@@ -58,8 +58,11 @@ exports.getBranches = async (req, res) => {
 
   try {
     const branches = await Branch.findAll();
-    const response = { status: 200,message: 'Fetched Branch successfully',
-      branches };
+    const response = {
+      status: 200,
+      message: "Fetched Branch successfully",
+      branches,
+    };
     branchLogger.info("Fetched all branches", {
       req: requestInfo,
       res: response,

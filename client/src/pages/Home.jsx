@@ -18,7 +18,6 @@ const Home = () => {
   );
   const menuDetails = useSelector((state) => state.menu.menuDetails);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     async function fetchData() {

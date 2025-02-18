@@ -1,12 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  UserOutlined,
-  SearchOutlined,
-  MenuOutlined,
-  CloseOutlined,
-} from "@ant-design/icons";
-import { Input, Button } from "antd";
+import { UserOutlined, MenuOutlined, CloseOutlined } from "@ant-design/icons";
+import { Input, Button, Avatar, Drawer } from "antd";
 import Badge from "@mui/material/Badge";
 import { styled } from "@mui/material/styles";
 import IconButton from "@mui/material/IconButton";
@@ -15,6 +10,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useModal } from "../context/ModalContext";
 import logo from "../assets/images/logo.png";
 import SearchBar from "./Home/SearchBar";
+import { useSelector } from "react-redux";
+import ProfileSidebar from "./Home/ProfileSidebar"; // Import sidebar component
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   "& .MuiBadge-badge": {
@@ -28,6 +25,10 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 const Navbar = () => {
   const { openModal } = useModal();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  const isUserLoggedIn = useSelector((state) => state.auth.isUserLogin);
+  const user = useSelector((state) => state.auth.user); // Assuming user details exist in Redux
 
   return (
     <nav className="fixed bottom-0 w-full z-50 bg-white/80 backdrop-blur-sm animate-fade-in shadow-xl border-t border-gray-300 transition-all duration-300 md:top-0 md:bottom-auto">
@@ -65,9 +66,21 @@ const Navbar = () => {
           <Link to="/help">
             <Button type="text">Help</Button>
           </Link>
-          <Button onClick={openModal} type="text" icon={<UserOutlined />}>
-            Sign In
-          </Button>
+
+          {isUserLoggedIn ? (
+            <Avatar
+              src={user?.profileImage || undefined}
+              icon={!user?.profileImage && <UserOutlined />}
+              className="cursor-pointer"
+              size="large"
+              onClick={() => setProfileOpen(true)}
+            />
+          ) : (
+            <Button onClick={openModal} type="text" icon={<UserOutlined />}>
+              Sign In
+            </Button>
+          )}
+
           <Link to="/cart">
             <IconButton aria-label="cart">
               <StyledBadge badgeContent={5} color="primary">
@@ -94,12 +107,28 @@ const Navbar = () => {
             <Link to="/help">
               <Button type="text">Help</Button>
             </Link>
-            <Button onClick={openModal} type="text" icon={<UserOutlined />}>
-              Sign In
-            </Button>
+            {isUserLoggedIn ? (
+              <Avatar
+                src={user?.profileImage || undefined}
+                icon={!user?.profileImage && <UserOutlined />}
+                className="cursor-pointer"
+                size="large"
+                onClick={() => setProfileOpen(true)}
+              />
+            ) : (
+              <Button onClick={openModal} type="text" icon={<UserOutlined />}>
+                Sign In
+              </Button>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Profile Sidebar */}
+      <ProfileSidebar
+        open={profileOpen}
+        onClose={() => setProfileOpen(false)}
+      />
     </nav>
   );
 };

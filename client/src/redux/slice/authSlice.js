@@ -10,6 +10,8 @@ const initialState = {
   loading: false,
   error: null,
   preLogin: true,
+  isAdmin: false,
+  isUserLogin: false,
 };
 
 export const loginAsync = createAsyncThunk(
@@ -63,6 +65,10 @@ const authSlice = createSlice({
       state.errorCode = null;
       state.loading = false;
       state.email = "";
+      state.error = null;
+      state.preLogin = true;
+      state.isAdmin = false;
+      state.isUserLogin = false;
 
       localStorage.removeItem("user");
       localStorage.removeItem("role");
@@ -88,6 +94,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.statusCode = action.payload.status;
         state.user = action.payload.user;
+        state.isUserLogin = true;
         state.token = action.payload.token;
       })
       .addCase(loginAsync.rejected, (state, action) => {

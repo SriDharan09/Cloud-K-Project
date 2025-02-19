@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.JSON,
         allowNull: true,
       },
-      profilePictureUrl: {
+      profileImage: {
         type: DataTypes.STRING,
         allowNull: true,
       },

@@ -5,7 +5,12 @@ const rateLimit = require("express-rate-limit");
 const db = require("./models");
 const cors = require("cors");
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173", 
+    credentials: true,
+  })
+);
 
 const authRoutes = require("./routers/auth");
 const categoryRoutes = require("./routers/category");
@@ -16,6 +21,7 @@ const branchRoutes = require("./routers/branch");
 const userAddressRouter = require("./routers/userAddress");
 const reviewRouter = require("./routers/review");
 const offerRouter = require("./routers/offer");
+const profileRoutes = require("./routers/profile");
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -23,7 +29,9 @@ const limiter = rateLimit({
 });
 
 app.use(limiter);
-app.use(express.json());
+app.use(express.json()); // Parses JSON request bodies
+app.use(express.urlencoded({ extended: true })); // Parses form data
+
 
 //app.use("/uploads", express.static("uploads"));
 app.use("/api/auth", authRoutes);
@@ -35,6 +43,7 @@ app.use("/api/branch", branchRoutes);
 app.use("/api/userAddresses", userAddressRouter);
 app.use("/api/reviews", reviewRouter);
 app.use("/api/offers", offerRouter);
+app.use("/api/profile", profileRoutes);
 
 const PORT = process.env.PORT || 5000;
 db.sequelize.sync().then(() => {

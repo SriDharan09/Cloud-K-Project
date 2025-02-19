@@ -258,12 +258,10 @@ exports.verifyEmail = async (req, res) => {
       req: requestInfo,
       error,
     });
-    res
-      .status(500)
-      .json({
-        title: "Verification Error",
-        error: "Verification failed. Please try again later.",
-      });
+    res.status(500).json({
+      title: "Verification Error",
+      error: "Verification failed. Please try again later.",
+    });
   }
 };
 
@@ -368,6 +366,7 @@ exports.login = async (req, res) => {
         email: user.email,
         cifId: user.userCIFId,
         roleId: user.Role.id,
+        profileImage: user.profileImage,
         roleName: user.Role.name,
       },
     };

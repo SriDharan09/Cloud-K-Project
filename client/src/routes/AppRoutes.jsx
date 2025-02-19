@@ -6,15 +6,16 @@ import FouroFour from "../components/Errors/FouroFour.jsx";
 import Help from "../pages/Help";
 import Cart from "../pages/Cart";
 import Offers from "../pages/Offers";
+import EditProfile from "../pages/EditProfile";
 
 const AppRoutes = () => {
-
   return (
     <Routes>
       <Route path="*" element={<FouroFour />} />
       <Route path="/help" element={<Help />} />
       <Route path="/cart" element={<Cart />} />
       <Route path="/offers" element={<Offers />} />
+      <Route path="/profile/edit" element={<EditProfile />} />
       {/* <Route path="/" element={<PrivateRoute element={<Home />} />} /> */}
       <Route path="/" element={<Home />} />
     </Routes>

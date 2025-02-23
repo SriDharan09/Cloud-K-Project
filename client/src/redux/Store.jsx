@@ -4,6 +4,7 @@ import branchReducer from "./slice/branchSlice";
 import categoryReducer from "./slice/categorySlice";
 import menuReducer from "./slice/menuSlice";
 import profileReducer from "./slice/profileSlice";
+import NotificationReducer from "./slice/notificationSlice";
 
 const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ const store = configureStore({
     category: categoryReducer,
     menu: menuReducer,
     profile: profileReducer,
+    notification: NotificationReducer,
   },
 });
 

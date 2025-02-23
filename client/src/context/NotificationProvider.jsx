@@ -17,17 +17,22 @@ export const NotificationProvider = ({ children }) => {
   };
 
   // Open notification safely
-  const openNotification = ( status, message, description ) => {
+  const openNotification = ( status, message, description = "" ) => {
     console.log(status, message, description);
     
     const type = statusToType[status] || "info"; 
     
-    if (!message || !description) return; 
-
-    api[type]({
+    if (!message) return; 
+    const notificationConfig = {
       message: String(message),
-      description: String(description),
-    });
+    };
+  
+    if (description) {
+      notificationConfig.description = String(description);
+    }
+    console.log(notificationConfig);
+    
+    api[type](notificationConfig)
   };
 
   return (

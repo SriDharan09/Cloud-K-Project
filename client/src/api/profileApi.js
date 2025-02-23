@@ -2,24 +2,25 @@ import axios from "axios";
 
 const API_BASE_URL = "http://localhost:5000/api/profile";
 
-// Function to get the token from localStorage
+// Create an axios instance
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true, // ✅ Needed for cookies-based auth
 });
 
-// 🔹 Add Authorization Header for JWT (if needed)
-axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token"); // ✅ Ensure token exists
+// Function to set Authorization Header (when calling API)
+const setAuthHeader = (token) => {
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  } else {
+    delete axiosInstance.defaults.headers.common["Authorization"];
   }
-  return config;
-});
+};
 
 // Fetch user profile
-export const getUserProfile = async () => {
+export const getUserProfile = async (token) => {
   try {
+    setAuthHeader(token);
     const response = await axiosInstance.get("/");
     return response.data;
   } catch (error) {
@@ -28,8 +29,9 @@ export const getUserProfile = async () => {
 };
 
 // Update user profile
-export const updateUserProfile = async (profileData) => {
+export const updateUserProfile = async (profileData, token) => {
   try {
+    setAuthHeader(token);
     const response = await axiosInstance.put("/", profileData);
     return response.data;
   } catch (error) {
@@ -38,8 +40,9 @@ export const updateUserProfile = async (profileData) => {
 };
 
 // Change password
-export const changeUserPassword = async (passwordData) => {
+export const changeUserPassword = async (passwordData, token) => {
   try {
+    setAuthHeader(token);
     const response = await axiosInstance.put("/change-password", passwordData);
     return response.data;
   } catch (error) {
@@ -48,11 +51,12 @@ export const changeUserPassword = async (passwordData) => {
 };
 
 // Upload profile image
-export const uploadProfileImage = async (file) => {
+export const uploadProfileImage = async (file, token) => {
   const formData = new FormData();
   formData.append("profileImage", file);
 
   try {
+    setAuthHeader(token);
     const response = await axiosInstance.post("/upload-image", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });

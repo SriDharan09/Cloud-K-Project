@@ -12,7 +12,7 @@ import {
   SettingOutlined,
   CustomerServiceOutlined,
 } from "@ant-design/icons";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector, shallowEqual} from "react-redux";
 import { logout } from "../../redux/slice/authSlice";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -20,7 +20,7 @@ import { motion } from "framer-motion";
 const ProfileSidebar = ({ open, onClose }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const user = useSelector((state) => state.auth.user);
+  const user = useSelector((state) => state.auth.user, shallowEqual);
 
   const handleLogout = () => {
     dispatch(logout());

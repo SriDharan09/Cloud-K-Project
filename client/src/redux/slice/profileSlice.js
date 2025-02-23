@@ -19,9 +19,14 @@ export const fetchUserProfile = createAsyncThunk(
   "profile/fetch",
   async (_, thunkAPI) => {
     try {
-      const data = await getUserProfile();
-      console.log(data);
+      const state = thunkAPI.getState();
+      const token = state.auth.token; // ✅ Get token from Redux
 
+      if (!token) {
+        return thunkAPI.rejectWithValue({ message: "Authentication token missing" });
+      }
+
+      const data = await getUserProfile(token);
       return data;
     } catch (error) {
       return thunkAPI.rejectWithValue({
@@ -37,7 +42,14 @@ export const updateProfileAsync = createAsyncThunk(
   "profile/update",
   async (profileData, thunkAPI) => {
     try {
-      const data = await updateUserProfile(profileData);
+      const state = thunkAPI.getState();
+      const token = state.auth.token;
+
+      if (!token) {
+        return thunkAPI.rejectWithValue({ message: "Authentication token missing" });
+      }
+
+      const data = await updateUserProfile(profileData, token);
       return data;
     } catch (error) {
       return thunkAPI.rejectWithValue({
@@ -53,9 +65,16 @@ export const changePasswordAsync = createAsyncThunk(
   "profile/changePassword",
   async (passwordData, thunkAPI) => {
     try {
-      console.log( JSON.stringify(passwordData, null, 2) + "Inside profile slice");
-      
-      const data = await changeUserPassword(passwordData);
+      const state = thunkAPI.getState();
+      const token = state.auth.token;
+
+      if (!token) {
+        return thunkAPI.rejectWithValue({ message: "Authentication token missing" });
+      }
+
+      console.log("🔹 Password Change Request:", JSON.stringify(passwordData, null, 2));
+
+      const data = await changeUserPassword(passwordData, token);
       return data;
     } catch (error) {
       return thunkAPI.rejectWithValue({
@@ -71,7 +90,14 @@ export const uploadProfileImageAsync = createAsyncThunk(
   "profile/uploadImage",
   async (file, thunkAPI) => {
     try {
-      const data = await uploadProfileImage(file);
+      const state = thunkAPI.getState();
+      const token = state.auth.token;
+
+      if (!token) {
+        return thunkAPI.rejectWithValue({ message: "Authentication token missing" });
+      }
+
+      const data = await uploadProfileImage(file, token);
       return data;
     } catch (error) {
       return thunkAPI.rejectWithValue({
@@ -102,8 +128,8 @@ const profileSlice = createSlice({
       })
       .addCase(fetchUserProfile.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.payload.message;
-        state.statusCode = action.payload.status;
+        state.error = action.payload?.message || "Failed to fetch profile";
+        state.statusCode = action.payload?.statusCode || 500;
         state.loading = false;
       })
 
@@ -120,8 +146,8 @@ const profileSlice = createSlice({
       })
       .addCase(updateProfileAsync.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.payload.message;
-        state.statusCode = action.payload.status;
+        state.error = action.payload?.message || "Failed to update profile";
+        state.statusCode = action.payload?.statusCode || 500;
         state.loading = false;
       })
 
@@ -137,8 +163,8 @@ const profileSlice = createSlice({
       })
       .addCase(changePasswordAsync.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.payload.message;
-        state.statusCode = action.payload.status;
+        state.error = action.payload?.message || "Failed to change password";
+        state.statusCode = action.payload?.statusCode || 500;
         state.loading = false;
       })
 
@@ -155,8 +181,8 @@ const profileSlice = createSlice({
       })
       .addCase(uploadProfileImageAsync.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.payload.message;
-        state.statusCode = action.payload.status;
+        state.error = action.payload?.message || "Failed to upload image";
+        state.statusCode = action.payload?.statusCode || 500;
         state.loading = false;
       });
   },

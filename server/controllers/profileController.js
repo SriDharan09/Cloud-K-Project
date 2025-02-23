@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const { User } = require("../models");
 const logger = require("../utils/logger/authLogger");
+const cloudinary = require("cloudinary").v2;
 
 exports.getProfile = async (req, res) => {
   try {
@@ -29,11 +30,11 @@ exports.getProfile = async (req, res) => {
     });
   }
 };
-
 exports.updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;
     const { username, phoneNumber, address, preferences } = req.body;
+    console.log("🔍 Full Request:", req.body);
 
     const user = await User.findByPk(userId);
     if (!user) {
@@ -43,17 +44,34 @@ exports.updateProfile = async (req, res) => {
       });
     }
 
-    await user.update({
-      username,
-      phoneNumber,
-      address: address ? JSON.stringify(address) : user.address,
-      preferences: preferences ? JSON.stringify(preferences) : user.preferences,
-    });
+    // Prepare update fields
+    const updatedData = {};
+    if (username) updatedData.username = username;
+    if (phoneNumber) updatedData.phoneNumber = phoneNumber;
+    if (address) updatedData.address =address; // Store as JSON string
+    if (preferences) updatedData.preferences = preferences; // Store as JSON string
+
+    // Update the user
+    await user.update(updatedData);
 
     res.status(200).json({
       status: 200,
       message: "Profile updated successfully",
-      user,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        address: user.address, // Ensure correct parsing
+        profileImage: user.profileImage,
+        isEmailVerified: user.isEmailVerified,
+        isActive: user.isActive,
+        lastLoginAt: user.lastLoginAt,
+        preferences: user.preferences, // Ensure correct parsing
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        RoleId: user.RoleId,
+      },
     });
   } catch (error) {
     console.error("Error updating profile:", error);
@@ -63,14 +81,13 @@ exports.updateProfile = async (req, res) => {
     });
   }
 };
-
 exports.changePassword = async (req, res) => {
   try {
     const userId = req.user.id;
     const { oldPassword, newPassword } = req.body;
     console.log("🔍 Full Request:", req.body);
     console.log(oldPassword + " " + newPassword);
-    
+
     if (!newPassword || newPassword.length < 6) {
       return res.status(400).json({
         status: 400,
@@ -133,6 +150,37 @@ exports.uploadProfileImage = async (req, res) => {
       });
     }
 
+    const oldImage = user.profileImage;
+
+    if (oldImage) {
+      try {
+        const urlParts = oldImage.split("/");
+        const filename = urlParts[urlParts.length - 1];
+        const publicId =
+          filename.substring(0, filename.lastIndexOf(".")) || filename;
+
+        const folder = "profiles/";
+        const oldImagePublicId = `${folder}${publicId}`;
+
+        console.log(" Extracted Public ID:", oldImagePublicId);
+
+        const result = await cloudinary.uploader.destroy(oldImagePublicId);
+
+        console.log("🔄 Cloudinary Delete Response:", result);
+
+        if (result.result !== "ok") {
+          console.warn(
+            "⚠️ Warning: Image might not have been deleted. Cloudinary response:",
+            result
+          );
+        }
+      } catch (error) {
+        console.error("❌ Error deleting old profile image:", error);
+      }
+    } else {
+      console.log("ℹ️ No existing profile image to delete.");
+    }
+
     user.profileImage = imageUrl;
     await user.save();
 
@@ -142,7 +190,7 @@ exports.uploadProfileImage = async (req, res) => {
       profileImage: imageUrl,
     });
   } catch (error) {
-    logger.error("Error uploading profile image", { error });
+    console.error("Error uploading profile image:", error);
     res.status(500).json({
       status: 500,
       message: "Image upload failed",

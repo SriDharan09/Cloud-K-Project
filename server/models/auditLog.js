@@ -10,23 +10,23 @@ module.exports = (sequelize, DataTypes) => {
       },
       action: {
         type: DataTypes.STRING,
-        allowNull: false, // e.g., 'CREATE', 'UPDATE', 'DELETE'
+        allowNull: false,
       },
       oldValues: {
         type: DataTypes.JSON,
-        allowNull: true, // Stores the previous state of the record before the update
+        allowNull: true, 
       },
       newValues: {
         type: DataTypes.JSON,
-        allowNull: true, // Stores the new state of the record after the update
+        allowNull: true,
       },
       changes: {
         type: DataTypes.JSON,
-        allowNull: true, // Specific changes made during the update
+        allowNull: true,
       },
       performedBy: {
         type: DataTypes.STRING,
-        allowNull: true, // The user who performed the action
+        allowNull: true, 
       },
       timestamp: {
         type: DataTypes.DATE,
@@ -35,7 +35,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       notes: {
         type: DataTypes.TEXT,
-        allowNull: true, // Additional notes or context about the operation
+        allowNull: true,
       },
     });
   

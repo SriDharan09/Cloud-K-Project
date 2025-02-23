@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { UserOutlined, MenuOutlined, CloseOutlined } from "@ant-design/icons";
-import { Input, Button, Avatar, Drawer } from "antd";
+import {
+  UserOutlined,
+  MenuOutlined,
+  CloseOutlined,
+  BellOutlined,
+} from "@ant-design/icons";
+import { Input, Button, Avatar, Drawer, Dropdown, Spin } from "antd";
 import Badge from "@mui/material/Badge";
 import { styled } from "@mui/material/styles";
 import IconButton from "@mui/material/IconButton";
@@ -10,8 +15,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useModal } from "../context/ModalContext";
 import logo from "../assets/images/logo.png";
 import SearchBar from "./Home/SearchBar";
-import { useSelector } from "react-redux";
-import ProfileSidebar from "./Home/ProfileSidebar"; // Import sidebar component
+import { useDispatch, useSelector, shallowEqual } from "react-redux";
+import { markAsReadAsync } from "../redux/slice/notificationSlice";
+import ProfileSidebar from "./Home/ProfileSidebar";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   "& .MuiBadge-badge": {
@@ -23,12 +29,53 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 }));
 
 const Navbar = () => {
+  const dispatch = useDispatch();
   const { openModal } = useModal();
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
 
   const isUserLoggedIn = useSelector((state) => state.auth.isUserLogin);
-  const user = useSelector((state) => state.auth.user); // Assuming user details exist in Redux
+  const user = useSelector((state) => state.auth.user);
+  const notifications =
+    useSelector((state) => state.notification.notifications) || [];
+  const unreadCount = notifications?.filter((n) => !n.is_read).length || 0;
+  console.log("Unread Count:", unreadCount);
+
+  // Handle marking notification as read
+  const handleNotificationClick = (id) => {
+    dispatch(markAsReadAsync(id));
+  };
+
+  const notificationItems =
+    Array.isArray(notifications) && notifications.length > 0
+      ? notifications.map((notif) => ({
+          key: notif.id,
+          label: (
+            <div
+              className={`p-2 border-b border-gray-200 cursor-pointer ${
+                notif.is_read ? "bg-gray-100" : "bg-white"
+              }`}
+              onClick={() => handleNotificationClick(notif.id)}
+            >
+              <h4 className="font-semibold">{notif.title}</h4>
+              <p className="text-sm text-gray-600">{notif.message}</p>
+              <span className="text-xs text-gray-400">
+                {new Date(notif.sent_at).toLocaleString()}
+              </span>
+            </div>
+          ),
+        }))
+      : [
+          {
+            key: "no-data",
+            label: (
+              <div className="p-4 text-center text-gray-500">
+                No notifications
+              </div>
+            ),
+          },
+        ];
 
   return (
     <nav className="fixed bottom-0 w-full z-50 bg-white/80 backdrop-blur-sm animate-fade-in shadow-xl border-t border-gray-300 transition-all duration-300 md:top-0 md:bottom-auto">
@@ -68,13 +115,31 @@ const Navbar = () => {
           </Link>
 
           {isUserLoggedIn ? (
-            <Avatar
-              src={user?.profileImage || undefined}
-              icon={!user?.profileImage && <UserOutlined />}
-              className="cursor-pointer"
-              size="large"
-              onClick={() => setProfileOpen(true)}
-            />
+            <>
+              <Dropdown
+                menu={{ items: notificationItems }}
+                trigger={["click"]}
+                open={notifOpen}
+                onOpenChange={setNotifOpen}
+                overlayClassName="w-80 max-h-96 overflow-auto bg-white shadow-lg rounded-lg"
+              >
+                <StyledBadge badgeContent={unreadCount} color="error">
+                  <Button
+                    type="text"
+                    icon={<BellOutlined />}
+                    onClick={() => setNotifOpen(!notifOpen)}
+                  />
+                </StyledBadge>
+              </Dropdown>
+
+              <Avatar
+                src={user?.profileImage || undefined}
+                icon={!user?.profileImage && <UserOutlined />}
+                className="cursor-pointer"
+                size="large"
+                onClick={() => setProfileOpen(true)}
+              />
+            </>
           ) : (
             <Button onClick={openModal} type="text" icon={<UserOutlined />}>
               Sign In

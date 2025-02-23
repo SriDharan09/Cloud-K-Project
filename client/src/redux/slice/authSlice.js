@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { userLogin, userRegister } from "../../api/authApi.js";
+import { fetchNotifications } from "./notificationSlice.js";
 
 const initialState = {
   user: null,
@@ -20,7 +21,9 @@ export const loginAsync = createAsyncThunk(
   async (credentials, thunkAPI) => {
     try {
       const userData = await userLogin(credentials);
-
+      setTimeout(() => {
+        thunkAPI.dispatch(fetchNotifications());
+      }, 500);
       if (!userData.user) {
         return userData;
       }
@@ -82,6 +85,13 @@ const authSlice = createSlice({
       state.token = action.payload.token;
       state.preLogin = false;
     },
+    setUpdateUser: (state, action) => {
+      console.log(action.payload);
+      state.user = {
+        ...state.user,
+        ...action.payload,
+      };
+    },
     setUserEmail: (state, action) => {
       state.email = action.payload.email;
     },
@@ -123,5 +133,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, setUser, setUserEmail } = authSlice.actions;
+export const { logout, setUser, setUserEmail, setUpdateUser } =
+  authSlice.actions;
 export default authSlice.reducer;

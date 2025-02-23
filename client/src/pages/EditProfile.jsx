@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector, shallowEqual } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { useModal } from "../context/ModalContext";
+import ProfileSkeleton from "../components/Skeleton/ProfileSkeleton";
+import { useNotification } from "../context/NotificationProvider";
+import { useLoader } from "../context/LoaderContext";
 import {
   fetchUserProfile,
   updateProfileAsync,
   changePasswordAsync,
   uploadProfileImageAsync,
 } from "../redux/slice/profileSlice";
+import { setUpdateUser } from "../redux/slice/authSlice";
 import {
   Avatar,
   Button,
@@ -25,23 +31,81 @@ import {
 } from "@ant-design/icons";
 
 const EditProfile = () => {
+  const openNotification = useNotification();
+  const { openModal } = useModal();
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.profile);
+  const navigate = useNavigate();
+  const { showLoader, hideLoader } = useLoader();
+  const { user } = useSelector((state) => state.profile, shallowEqual);
+  const isUserLogin = useSelector(
+    (state) => state.auth.isUserLogin,
+    shallowEqual
+  );
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
   const [passwordForm] = Form.useForm();
   const [editModal, setEditModal] = useState({ open: false, field: "" });
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchUserProfile());
-  }, [dispatch]);
+    console.log("isUserLogin:", isUserLogin);
 
+    if (!isUserLogin) {
+      setTimeout(() => {
+        openModal();
+      }, 2000);
+
+      setTimeout(() => {
+        navigate("/", { replace: true });
+      }, 500);
+    } else {
+      dispatch(fetchUserProfile());
+    }
+  }, [dispatch, isUserLogin, navigate]);
+
+  if (!isUserLogin) {
+    return <ProfileSkeleton />;
+  }
   const handleUpdateProfile = async (values) => {
     setLoading(true);
-    const response = await dispatch(updateProfileAsync(values));
+
+    // Transform address fields if they exist
+    const updatedValues = { ...values };
+
+    if (values.street || values.city || values.state || values.zip) {
+      updatedValues.address = {
+        street: values.street || user?.address?.street,
+        city: values.city || user?.address?.city,
+        state: values.state || user?.address?.state,
+        zip: values.zip || user?.address?.zip,
+      };
+
+      // Remove individual address fields to avoid redundancy
+      delete updatedValues.street;
+      delete updatedValues.city;
+      delete updatedValues.state;
+      delete updatedValues.zip;
+    }
+    if (values.theme || values.notifications !== undefined) {
+      updatedValues.preferences = {
+        theme: values.theme || user?.preferences?.theme,
+        notifications:
+          values.notifications !== undefined
+            ? values.notifications
+            : user?.preferences?.notifications,
+      };
+
+      delete updatedValues.theme;
+      delete updatedValues.notifications;
+    }
+
+    const response = await dispatch(updateProfileAsync(updatedValues));
+    console.log("Update Profile Response:", response);
+
     setLoading(false);
     if (response.meta.requestStatus === "fulfilled") {
-      message.success("Profile updated successfully");
+      dispatch(fetchUserProfile());
+      openNotification(response.payload.status, response.payload.message, "");
       setEditModal({ open: false, field: "" });
     } else {
       message.error("Failed to update profile");
@@ -78,37 +142,67 @@ const EditProfile = () => {
 
   const handleUpload = async ({ file }) => {
     const response = await dispatch(uploadProfileImageAsync(file));
+    showLoader();
     if (response.meta.requestStatus === "fulfilled") {
+      console.log("Upload Response:", response);
+      if (response.payload.status === 200) {
+        dispatch(fetchUserProfile());
+        dispatch(
+          setUpdateUser({ profileImage: response.payload.profileImage })
+        );
+      }
+      openNotification(response.payload.status, response.payload.message, "");
+      hideLoader();
       message.success("Profile image updated");
     } else {
+      hideLoader();
       message.error("Failed to upload image");
     }
   };
 
   return (
-    <div className="max-w-6xl mx-auto mt-10 p-8 bg-white rounded-lg shadow-lg space-y-8">
+    <div className="max-w-6xl mx-auto mt-18 p-8 bg-white rounded-lg shadow-lg space-y-8">
       {/* Profile & Username (Centered) */}
       <div className="flex flex-col items-center pb-6">
         <Avatar
           size={120}
           src={user?.profileImage}
+          onClick={() => setIsModalOpen(true)}
           className="border border-gray-300 shadow-md"
         />
-        <Upload customRequest={handleUpload} showUploadList={false}>
-          <Button type="primary" icon={<UploadOutlined />}>
-            Change Profile Picture
-          </Button>
-        </Upload>
+        <div className="mt-4">
+          <Upload customRequest={handleUpload} showUploadList={false}>
+            <Button type="primary" icon={<UploadOutlined />}>
+              Change Profile Picture
+            </Button>
+          </Upload>
+        </div>
         <h2 className="text-2xl font-semibold mt-2">{user?.username}</h2>
+        <Modal
+          open={isModalOpen}
+          footer={null}
+          onCancel={() => setIsModalOpen(false)}
+          centered
+          width=""
+          className="custom-modal"
+        >
+          <div className="flex items-center justify-center overflow-auto">
+            <img
+              src={user?.profileImage}
+              alt="Profile"
+              className="max-w-[90vw] max-h-[90vh] rounded-lg shadow-lg object-contain"
+            />
+          </div>
+        </Modal>
       </div>
 
       {/* Sections */}
       <div className="grid grid-cols-1 gap-6">
         <Card title="General" className="shadow">
-          <p>
+          <p className="mb-2">
             <strong>Email:</strong> {user?.email}
           </p>
-          <p>
+          <p className="mb-2">
             <strong>Phone:</strong> {user?.phoneNumber}
           </p>
           <Button
@@ -124,7 +218,7 @@ const EditProfile = () => {
           <p>
             {user?.address?.street}, {user?.address?.city}
           </p>
-          <p>
+          <p className="mb-4">
             {user?.address?.state}, {user?.address?.zip}
           </p>
           <Button
@@ -137,7 +231,7 @@ const EditProfile = () => {
         </Card>
 
         <Card title="Security" className="shadow">
-          <p>Change your password</p>
+          <p className="mb-3">Change your password</p>
           <Button
             type="primary"
             icon={<LockOutlined />}
@@ -148,11 +242,11 @@ const EditProfile = () => {
         </Card>
 
         <Card title="Preferences" className="shadow">
-          <p>
+          <p className="mb-4">
             <strong>Dark Mode:</strong>{" "}
             <Switch checked={user?.preferences?.theme === "dark"} />
           </p>
-          <p>
+          <p className="mb-4">
             <strong>Notifications:</strong>{" "}
             <Switch checked={user?.preferences?.notifications} />
           </p>
@@ -281,6 +375,35 @@ const EditProfile = () => {
               block
             >
               Change Password
+            </Button>
+          </Form>
+        )}
+
+        {editModal.field === "preferences" && (
+          <Form form={form} layout="vertical" onFinish={handleUpdateProfile}>
+            <Form.Item
+              label="Dark Mode"
+              name="theme"
+              initialValue={user?.preferences?.theme}
+            >
+              <Switch
+                checked={form.getFieldValue("theme") === "dark"}
+                onChange={
+                  (checked) =>
+                    form.setFieldsValue({ theme: checked ? "dark" : "light" }) // Convert boolean to string
+                }
+              />
+            </Form.Item>
+            <Form.Item
+              label="Notifications"
+              name="notifications"
+              valuePropName="checked"
+              initialValue={user?.preferences?.notifications}
+            >
+              <Switch />
+            </Form.Item>
+            <Button type="primary" htmlType="submit" loading={loading} block>
+              Save Preferences
             </Button>
           </Form>
         )}

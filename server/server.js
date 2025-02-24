@@ -5,14 +5,14 @@ const rateLimit = require("express-rate-limit");
 const cors = require("cors");
 const db = require("./models");
 const { initializeSocket } = require("./utils/socket");
-const { startRandomNotificationJob } = require("./utils/notificationService");
+const { startNotificationJobs } = require("./utils/notificationService");
 
 
 const app = express();
 const server = http.createServer(app);
 const io = initializeSocket(server); 
-startRandomNotificationJob();
 app.set("io", io);
+startNotificationJobs();
 
 // Middlewares
 app.use(

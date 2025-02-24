@@ -16,6 +16,7 @@ const moment = require("moment-timezone");
 const cron = require("node-cron");
 const PDFDocument = require("pdfkit-table");
 const fs = require("fs");
+const { notifyUser } = require("../utils/notificationService");
 const orderAttributes = [
   "id",
   "total_price",
@@ -614,11 +615,9 @@ exports.rateFood = async (req, res) => {
       !order ||
       (order.status !== "delivered" && order.status !== "completed")
     ) {
-      return res
-        .status(400)
-        .json({
-          error: "Reviews can only be added for delivered or completed orders",
-        });
+      return res.status(400).json({
+        error: "Reviews can only be added for delivered or completed orders",
+      });
     }
 
     if (order.orderBy !== userCifId) {
@@ -1097,7 +1096,8 @@ const updateOrderStatuses = async () => {
     let updates = [];
 
     for (const order of orders) {
-      let { estimatedDeliveryTime, createdAt, paymentStatus, status } = order;
+      let { estimatedDeliveryTime, createdAt, paymentStatus, status, orderBy } =
+        order;
 
       if (!estimatedDeliveryTime) continue;
 
@@ -1120,6 +1120,7 @@ const updateOrderStatuses = async () => {
       let newStatus = status;
       let newPaymentStatus = paymentStatus;
       let completedAt = null;
+      let notificationKey = null;
 
       if (elapsedMinutes >= totalTime) {
         newStatus = "delivered";
@@ -1127,9 +1128,12 @@ const updateOrderStatuses = async () => {
         if (paymentStatus === "unpaid") {
           newPaymentStatus = "paid";
         }
+        notificationKey = "orderDelivered";
       } else if (elapsedMinutes >= preparationTime) {
+        notificationKey = "orderOnTheWay";
         newStatus = "on the way";
       } else {
+        notificationKey = "orderPreparing";
         newStatus = "preparing";
       }
 
@@ -1143,6 +1147,8 @@ const updateOrderStatuses = async () => {
           status: newStatus,
           paymentStatus: newPaymentStatus,
           completedAt: completedAt,
+          orderBy,
+          notificationKey,
         });
       }
     }
@@ -1160,6 +1166,16 @@ const updateOrderStatuses = async () => {
         console.log(
           `✅ Order ${update.id} updated to ${update.status}, Payment Status: ${update.paymentStatus}, Completed At: ${update.completedAt}`
         );
+        if (update.notificationKey) {
+          console.log(update);
+          await notifyUser(update.orderBy, update.notificationKey, {
+            orderId: update.id,
+            status: update.status,
+          });
+          console.log(
+            `📩 Notification Sent to ${update.orderBy} | Order: ${update.id} | Type: ${update.notificationKey}`
+          );
+        }
       }
     }
   } catch (error) {

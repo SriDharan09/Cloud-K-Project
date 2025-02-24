@@ -1,5 +1,6 @@
 import React, { createContext, useContext } from "react";
 import { notification } from "antd";
+import { BellOutlined } from "@ant-design/icons";
 
 const NotificationContext = createContext();
 
@@ -17,22 +18,24 @@ export const NotificationProvider = ({ children }) => {
   };
 
   // Open notification safely
-  const openNotification = ( status, message, description = "" ) => {
+  const openNotification = (status, message, description = "", options = {}) => {
+    const isSocketNotification = options?.isSocket || false;
     console.log(status, message, description);
-    
-    const type = statusToType[status] || "info"; 
-    
-    if (!message) return; 
+
+    const type = statusToType[status] || "info";
+
+    if (!message) return;
+
     const notificationConfig = {
       message: String(message),
+      description: String(description),
+      placement: options.placement || "topRight",
+      duration: options.duration ?? 4.5,
+      icon: isSocketNotification ? <BellOutlined style={{ fontSize: 20, color: "#1890ff" }} /> : undefined, 
     };
-  
-    if (description) {
-      notificationConfig.description = String(description);
-    }
+
     console.log(notificationConfig);
-    
-    api[type](notificationConfig)
+    api[type](notificationConfig);
   };
 
   return (

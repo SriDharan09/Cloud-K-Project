@@ -36,6 +36,10 @@ db.UserAddress = require("./userAddress")(sequelize, DataTypes);
 db.Customization = require("./customization")(sequelize, DataTypes);
 db.AuditLog = require("./auditLog")(sequelize, DataTypes);
 db.Notification = require("./notification")(sequelize, DataTypes);
+db.NotificationTemplate = require("./notificationTemplate")(
+  sequelize,
+  DataTypes
+);
 
 db.Role.hasMany(db.User);
 db.User.belongsTo(db.Role);

@@ -1,17 +1,28 @@
-const { notifyUser, notifyMultipleUsers } = require("../utils/notificationService");
-const { Notification } = require("../models")
+const {
+  notifyUser,
+  notifyMultipleUsers,
+} = require("../utils/notificationService");
+const { Notification } = require("../models");
 
 exports.sendNotification = async (req, res) => {
   try {
     const { userCIFId, type, title, message, data } = req.body;
+    templateKey = "";
+    replacements = "";
+    console.log(req.body);
+    
 
     console.log(`📨 Sending notification to ${userCIFId}: ${title}`);
 
-    // Get Socket.io instance
-    const io = req.app.get("io");
-
-    // Send notification
-    const notification = await notifyUser(userCIFId, title, message, type, data);
+    const notification = await notifyUser(
+      userCIFId,
+      templateKey,
+      replacements,
+      title,
+      message,
+      type,
+      data,
+    );
 
     return res.status(201).json({ success: true, notification });
   } catch (error) {
@@ -29,7 +40,9 @@ exports.sendBulkNotifications = async (req, res) => {
     const io = req.app.get("io");
     await notifyMultipleUsers(io, userCIFIds, title, message, type, data);
 
-    return res.status(201).json({ success: true, message: "Bulk notifications sent" });
+    return res
+      .status(201)
+      .json({ success: true, message: "Bulk notifications sent" });
   } catch (error) {
     console.error("❌ Error sending bulk notifications:", error);
     return res.status(500).json({ success: false, error: "Server error" });

@@ -1,5 +1,6 @@
 import React from "react";
 import banner from "../../assets/images/hero_banner.jpg";
+import { Link } from "react-router-dom";
 
 const HeroSection = () => {
   return (
@@ -18,7 +19,7 @@ const HeroSection = () => {
           Order from your favorite restaurants now.
         </p>
         <button className="mt-4 px-6 py-2 bg-red-500 text-white rounded-lg shadow-md">
-          Order Now
+          <Link to={"/order-food"}>Order Now</Link>
         </button>
       </div>
     </div>

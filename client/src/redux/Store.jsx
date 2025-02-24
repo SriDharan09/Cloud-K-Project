@@ -5,6 +5,7 @@ import categoryReducer from "./slice/categorySlice";
 import menuReducer from "./slice/menuSlice";
 import profileReducer from "./slice/profileSlice";
 import NotificationReducer from "./slice/notificationSlice";
+import orderReducer from "./slice/orderSlice";
 
 const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ const store = configureStore({
     menu: menuReducer,
     profile: profileReducer,
     notification: NotificationReducer,
+    order: orderReducer
   },
 });
 

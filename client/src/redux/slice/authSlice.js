@@ -28,10 +28,10 @@ export const loginAsync = createAsyncThunk(
         return userData;
       }
 
-      localStorage.setItem("user", JSON.stringify(userData.user));
-      localStorage.setItem("token", userData.token);
-      localStorage.setItem("CIFID", userData.user.cifId);
-      localStorage.setItem("role", userData.user.roleName);
+      // localStorage.setItem("user", JSON.stringify(userData.user));
+      // localStorage.setItem("token", userData.token);
+      // localStorage.setItem("CIFID", userData.user.cifId);
+      // localStorage.setItem("role", userData.user.roleName);
 
       return userData;
     } catch (error) {

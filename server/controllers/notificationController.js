@@ -1,31 +1,37 @@
-const { Notification } = require("../models");
-const { Op } = require("sequelize");
+const { notifyUser, notifyMultipleUsers } = require("../utils/notificationService");
+const { Notification } = require("../models")
 
-// Send notification to a specific user
 exports.sendNotification = async (req, res) => {
   try {
-    const { type, title, message, data } = req.body;
-    const userCIFId = req.userCIFId;
-    console.log("Notification Req" + req.body.title + ": " + req.body.message);
-    
+    const { userCIFId, type, title, message, data } = req.body;
 
-    // Save notification in the database
-    const notification = await Notification.create({
-      userCIFId,
-      type,
-      title,
-      message,
-      data,
-      is_read: false,
-    });
+    console.log(`📨 Sending notification to ${userCIFId}: ${title}`);
 
-    // Emit to Socket.io (if user is online)
+    // Get Socket.io instance
     const io = req.app.get("io");
-    io.to(`user_${userCIFId}`).emit("new_notification", notification);
+
+    // Send notification
+    const notification = await notifyUser(userCIFId, title, message, type, data);
 
     return res.status(201).json({ success: true, notification });
   } catch (error) {
-    console.error("Error sending notification:", error);
+    console.error("❌ Error sending notification:", error);
+    return res.status(500).json({ success: false, error: "Server error" });
+  }
+};
+
+// Bulk notifications (e.g., promotions)
+exports.sendBulkNotifications = async (req, res) => {
+  try {
+    const { userCIFIds, type, title, message, data } = req.body;
+    console.log(`📢 Sending bulk notifications to ${userCIFIds.length} users`);
+
+    const io = req.app.get("io");
+    await notifyMultipleUsers(io, userCIFIds, title, message, type, data);
+
+    return res.status(201).json({ success: true, message: "Bulk notifications sent" });
+  } catch (error) {
+    console.error("❌ Error sending bulk notifications:", error);
     return res.status(500).json({ success: false, error: "Server error" });
   }
 };

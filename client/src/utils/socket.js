@@ -1,18 +1,10 @@
 import { io } from "socket.io-client";
 
-const SOCKET_URL = "http://localhost:5000";
+const SOCKET_URL = "http://localhost:5000"; // Change to backend URL in production
 
-export const socket = io(SOCKET_URL, { autoConnect: false });
+const socket = io(SOCKET_URL, {
+  transports: ["websocket"], // Ensure WebSocket transport is used
+  withCredentials: true, // Allows CORS credentials
+});
 
-export const connectSocket = (userCIFId) => {
-    if (!socket.connected) {
-      socket.connect();
-      socket.emit("registerUser", userCIFId);
-    }
-  };
-
-export const disconnectSocket = () => {
-  if (socket.connected) {
-    socket.disconnect();
-  }
-};
+export default socket;

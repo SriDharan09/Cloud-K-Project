@@ -12,6 +12,7 @@ const initialState = {
   loading: false,
 };
 
+// Async Thunks (Fetch, Mark Read, Delete)
 export const fetchNotifications = createAsyncThunk(
   "notifications/fetch",
   async (_, thunkAPI) => {
@@ -66,7 +67,15 @@ export const deleteNotificationAsync = createAsyncThunk(
 const notificationSlice = createSlice({
   name: "notifications",
   initialState,
-  reducers: {},
+  reducers: {
+    // ✅ New reducer to handle real-time notifications
+    addNotification: (state, action) => {
+      if (!state.notifications) {
+        state.notifications = []; // ✅ Ensure the array exists before using unshift
+      }
+      state.notifications.unshift(action.payload); // Add new notification to top
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchNotifications.pending, (state) => {
@@ -99,5 +108,7 @@ const notificationSlice = createSlice({
   },
 });
 
+// ✅ Export the new action
+export const { addNotification } = notificationSlice.actions;
+
 export default notificationSlice.reducer;
-    

@@ -9,6 +9,7 @@ import { NotificationProvider } from "./context/NotificationProvider";
 import { LoaderProvider } from "./context/LoaderContext";
 import { ModalProvider } from "./context/ModalContext";
 import ErrorBoundary from "./context/ErrorBoundary";
+import NotificationListener from "./utils/NotificationListener";
 
 // Global Components
 import Layout from "./components/Layout";
@@ -35,6 +36,7 @@ function App() {
           <NotificationProvider>
             <ModalProvider>
               <Layout>
+                <NotificationListener /> 
                 <AppRoutes />
               </Layout>
             </ModalProvider>

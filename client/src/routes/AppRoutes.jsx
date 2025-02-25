@@ -8,6 +8,8 @@ import Cart from "../pages/Cart";
 import Offers from "../pages/Offers";
 import EditProfile from "../pages/EditProfile";
 import Orders from "../pages/Orders";
+import BranchDetails from "../components/ordersDependency/BranchDetails.jsx";
+import CheckoutPage from "../pages/CheckoutPage.jsx";
 
 const AppRoutes = () => {
   return (
@@ -17,6 +19,8 @@ const AppRoutes = () => {
       <Route path="/cart" element={<Cart />} />
       <Route path="/offers" element={<Offers />} />
       <Route path="/order-food" element={<Orders />} />
+      <Route path="/order-food/:branchSlug" element={<BranchDetails />} />
+      <Route path="/checkout/:id" element={<CheckoutPage />} />
       <Route path="/profile/edit" element={<EditProfile />} />
       {/* <Route path="/" element={<PrivateRoute element={<Home />} />} /> */}
       <Route path="/" element={<Home />} />

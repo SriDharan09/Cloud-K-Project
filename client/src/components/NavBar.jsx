@@ -35,6 +35,7 @@ const Navbar = () => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
 
+  const cart = useSelector((state) => state.cart.bucket);
   const isUserLoggedIn = useSelector((state) => state.auth.isUserLogin);
   const user = useSelector((state) => state.auth.user);
   const notifications =
@@ -42,6 +43,12 @@ const Navbar = () => {
   const unreadCount = notifications?.filter((n) => !n.is_read).length || 0;
   console.log("Unread Count:", unreadCount);
 
+  const cartItemCount = Object.keys(cart).length;
+
+  // Get the total number of items across all branches
+  const totalItems = Object.values(cart).reduce((total, branch) => {
+    return total + branch.items.reduce((sum, item) => sum + item.quantity, 0);
+  }, 0);
   // Handle marking notification as read
   const handleNotificationClick = (id) => {
     dispatch(markAsReadAsync(id));
@@ -93,7 +100,7 @@ const Navbar = () => {
         <div className="flex md:hidden items-center gap-3">
           <Link to="/cart">
             <IconButton aria-label="cart">
-              <StyledBadge badgeContent={5} color="primary">
+              <StyledBadge badgeContent={cartItemCount} color="primary">
                 <ShoppingCartIcon />
               </StyledBadge>
             </IconButton>
@@ -148,7 +155,7 @@ const Navbar = () => {
 
           <Link to="/cart">
             <IconButton aria-label="cart">
-              <StyledBadge badgeContent={5} color="primary">
+              <StyledBadge badgeContent={cartItemCount} color="primary">
                 <ShoppingCartIcon />
               </StyledBadge>
             </IconButton>

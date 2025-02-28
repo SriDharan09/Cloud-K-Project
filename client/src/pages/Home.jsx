@@ -21,10 +21,11 @@ const Home = () => {
 
   useEffect(() => {
     async function fetchData() {
-      await dispatch(fetchBranchDetails());
-      await dispatch(fetchCategoryDetails());
-      await dispatch(fetchMenuDetails());
-      setTimeout(() => setLoading(false), 1000);
+      if (!branchDetails.length) await dispatch(fetchBranchDetails());
+      if (!categoryDetails.length) await dispatch(fetchCategoryDetails());
+      if (!menuDetails.length) await dispatch(fetchMenuDetails());
+
+      setTimeout(() => setLoading(false), 500);
     }
 
     fetchData();

@@ -41,15 +41,12 @@ const Navbar = () => {
   const notifications =
     useSelector((state) => state.notification.notifications) || [];
   const unreadCount = notifications?.filter((n) => !n.is_read).length || 0;
-  console.log("Unread Count:", unreadCount);
 
   const cartItemCount = Object.keys(cart).length;
 
-  // Get the total number of items across all branches
   const totalItems = Object.values(cart).reduce((total, branch) => {
     return total + branch.items.reduce((sum, item) => sum + item.quantity, 0);
   }, 0);
-  // Handle marking notification as read
   const handleNotificationClick = (id) => {
     dispatch(markAsReadAsync(id));
   };

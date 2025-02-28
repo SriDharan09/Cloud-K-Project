@@ -1,5 +1,8 @@
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchBranchDetails } from "../../redux/slice/branchSlice";
+import { fetchCategoryDetails } from "../../redux/slice/categorySlice";
+import { fetchMenuDetails } from "../../redux/slice/menuSlice";
 import { Select, Carousel, Button } from "antd";
 import { useNavigate } from "react-router-dom";
 import BranchCard from "./BranchCard";
@@ -7,11 +10,22 @@ import BranchCard from "./BranchCard";
 const { Option } = Select;
 
 const ShowcaseBranches = () => {
-  const branches = useSelector((state) => state.branch.branchDetails.branches);
+  const dispatch = useDispatch();
+
+  const branches = useSelector((state) => state.branch.branchDetails.branches || []);
   const categories = useSelector(
-    (state) => state.category.categoryDetails.categories
+    (state) => state.category.categoryDetails.categories || []
   );
-  const menuItems = useSelector((state) => state.menu.menuDetails.menuItems);
+  const menuItems = useSelector((state) => state.menu.menuDetails.menuItems || []);
+
+  useEffect(() => {
+    async function fetchData() {
+      if (!branches.length) await dispatch(fetchBranchDetails());
+      if (!categories.length) await dispatch(fetchCategoryDetails());
+      if (!menuItems.length) await dispatch(fetchMenuDetails());
+    }
+    fetchData();
+  }, [dispatch]);
 
   const [sortOrder, setSortOrder] = useState("name");
   const [selectedCategory, setSelectedCategory] = useState(null);

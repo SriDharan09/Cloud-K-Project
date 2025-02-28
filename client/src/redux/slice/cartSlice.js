@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  bucket: {}, // Stores cart data based on BranchId
+  bucket: {},
 };
 
 const cartSlice = createSlice({
@@ -12,7 +12,6 @@ const cartSlice = createSlice({
       const { BranchId, MenuItemId, name, price, quantity, menuImage, isVeg } =
         action.payload;
 
-      // Initialize branch bucket if it doesn't exist
       if (!state.bucket[BranchId]) {
         state.bucket[BranchId] = {
           BranchId,
@@ -24,11 +23,10 @@ const cartSlice = createSlice({
           specialInstructions: "",
           paymentMethod: "",
           deliveryDistance: 0,
-          frontendItems: {}, // Stores additional details for UI
+          frontendItems: {},
         };
       }
 
-      // Check if the item already exists
       const existingItem = state.bucket[BranchId].items.find(
         (i) => i.MenuItemId === MenuItemId
       );
@@ -42,7 +40,6 @@ const cartSlice = createSlice({
         });
       }
 
-      // Store additional frontend details separately
       state.bucket[BranchId].frontendItems[MenuItemId] = {
         name,
         price,
@@ -58,7 +55,6 @@ const cartSlice = createSlice({
           (i) => i.MenuItemId !== MenuItemId
         );
 
-        // Remove additional frontend details
         delete state.bucket[BranchId].frontendItems[MenuItemId];
 
         if (state.bucket[BranchId].items.length === 0) {
@@ -93,25 +89,30 @@ const cartSlice = createSlice({
       state.bucket = {};
     },
 
-    getCartForOrder: (state, action) => {
+    deleteCartAfterOrder: (state, action) => {
       const { BranchId } = action.payload;
       if (state.bucket[BranchId]) {
-        return {
-          BranchId,
-          items: state.bucket[BranchId].items,
-          customerName: state.bucket[BranchId].customerName,
-          customerContact: state.bucket[BranchId].customerContact,
-          customerAddress: state.bucket[BranchId].customerAddress,
-          notes: state.bucket[BranchId].notes,
-          specialInstructions: state.bucket[BranchId].specialInstructions,
-          paymentMethod: state.bucket[BranchId].paymentMethod,
-          deliveryDistance: state.bucket[BranchId].deliveryDistance,
-        };
+        delete state.bucket[BranchId];
       }
-      return null;
     },
   },
 });
+
+export const getCartForOrder = (state, BranchId) => {
+  return state.cart.bucket[BranchId]
+    ? {
+        BranchId,
+        items: state.cart.bucket[BranchId].items,
+        customerName: state.cart.bucket[BranchId].customerName,
+        customerContact: state.cart.bucket[BranchId].customerContact,
+        customerAddress: state.cart.bucket[BranchId].customerAddress,
+        notes: state.cart.bucket[BranchId].notes,
+        specialInstructions: state.cart.bucket[BranchId].specialInstructions,
+        paymentMethod: state.cart.bucket[BranchId].paymentMethod,
+        deliveryDistance: state.cart.bucket[BranchId].deliveryDistance,
+      }
+    : null;
+};
 
 export const {
   addToCart,
@@ -119,6 +120,7 @@ export const {
   updateQuantity,
   updateCustomerDetails,
   clearCart,
-  getCartForOrder,
+  deleteCartAfterOrder,
 } = cartSlice.actions;
+
 export default cartSlice.reducer;

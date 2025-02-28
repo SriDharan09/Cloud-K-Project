@@ -41,7 +41,7 @@ const CartPage = () => {
             <Button
               type="primary"
               className="mt-3"
-              onClick={() => navigate(`/checkout/${branch.BranchId}`)}
+              onClick={() => navigate(`/cart/${branch.BranchId}`)}
             >
               Proceed to Checkout
             </Button>

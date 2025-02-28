@@ -44,7 +44,7 @@ const BranchDetails = () => {
             <Title level={2}>{branch.name}</Title>
             <Paragraph>{branch.address}</Paragraph>
             <Paragraph strong>Delivery Time: {branch.deliveryTime} mins</Paragraph>
-            <Rate allowHalf defaultValue={branch.rating || 4.5} />
+            <Rate  disabled allowHalf defaultValue={branch.rating || 4.5} />
           </Col>
         </Row>
       </Card>

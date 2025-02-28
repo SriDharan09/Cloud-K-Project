@@ -312,6 +312,9 @@ exports.createOrder = async (req, res) => {
 
     // Structured Response
     res.json({
+      status: 200,
+      success: true,
+      title: "Order placed successfully",
       orderDetails: {
         orderId: order.id,
         orderDate: new Date(order.createdAt).toLocaleDateString("en-GB"),

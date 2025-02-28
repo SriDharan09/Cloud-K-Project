@@ -21,6 +21,7 @@ import StepConnector, {
 } from "@mui/material/StepConnector";
 const steps = ["Register", "Verify Email"];
 import { useModal } from "../context/ModalContext";
+import { fetchUserProfile } from "../redux/slice/profileSlice";
 
 const ColorlibConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
@@ -106,6 +107,7 @@ const Login = () => {
     if (result?.payload) {
       if (result.payload.status === 200 || result.payload.status === 201) {
         closeModal();
+        dispatch(fetchUserProfile());
       }
       openNotification(
         result.payload.status,

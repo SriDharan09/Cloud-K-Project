@@ -11,7 +11,6 @@ const Layout = ({ children }) => {
 
   // Hide Navbar & Footer on 404 page
   const is404 = location.pathname === "/404" || location.pathname === "*";
-  console.log(is404);
 
   const { isModalOpen, closeModal } = useModal();
 

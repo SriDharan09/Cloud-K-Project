@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { createOrderAsync } from "../redux/slice/orderSlice";
 import { Button, Input, Checkbox, message } from "antd";
+import { deleteCartAfterOrder } from "../redux/slice/cartSlice";
+import BreadcrumbNav from "../components/ordersDependency/BreadcrumbNav";
 
 const CheckoutPage = () => {
   const { id } = useParams();
@@ -11,7 +13,7 @@ const CheckoutPage = () => {
 
   const profile = useSelector((state) => state.profile.user);
   const cart = useSelector((state) => state.cart.bucket[id]); // Fetch cart for branch
-  console.log(cart);
+  console.log(cart.BranchId);
 
   const orderStatus = useSelector((state) => state.order.status);
 
@@ -57,14 +59,16 @@ const CheckoutPage = () => {
   // Handle order placement
   const handleOrderPlacement = async () => {
     if (!cart || cart.items.length === 0) {
-      return message.error("Your cart is empty. Please add items before proceeding.");
+      return message.error(
+        "Your cart is empty. Please add items before proceeding."
+      );
     }
 
     const orderData = {
-      BranchId: Number(id),
+      BranchId: Number(cart.BranchId),
       items: cart.items,
       ...formData,
-      deliveryDistance: 2, // Example distance
+      deliveryDistance: 2,
     };
 
     try {
@@ -72,8 +76,10 @@ const CheckoutPage = () => {
       const response = await dispatch(createOrderAsync(orderData));
       console.log(response.payload);
       if (response.payload?.success) {
+        console.log(cart);
+        dispatch(deleteCartAfterOrder({ BranchId: cart.BranchId }));
         message.success("Order placed successfully!");
-        navigate("/orders"); // Redirect to orders page
+        navigate("/");
       } else {
         message.error(response.payload?.message || "Failed to place order.");
       }
@@ -84,7 +90,10 @@ const CheckoutPage = () => {
 
   return (
     <div className="p-6">
-      <h2 className="text-xl font-semibold mb-4">Checkout - Branch {id}</h2>
+      <h2 className="text-xl font-semibold mb-4">
+        Checkout - Branch {cart.BranchId}
+      </h2>
+      <BreadcrumbNav />
 
       <Checkbox checked={autoFill} onChange={handleToggleAutoFill}>
         Auto-Fill from Profile

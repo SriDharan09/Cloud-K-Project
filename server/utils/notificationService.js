@@ -139,8 +139,8 @@ const sendBulkPromotion = async () => {
 
 // ⏰ Schedule Automated Notifications
 const startNotificationJobs = () => {
-  cron.schedule("0 * * * *", async () => {
-    console.log("⏳ Running automated notification job...");
+  cron.schedule("0 12,20 * * *", async () => {
+    console.log("📢 Sending bulk promotional notifications...");
     await sendBulkPromotion();
   });
   cron.schedule("* * * * *", () => {

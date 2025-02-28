@@ -105,6 +105,9 @@ const EditProfile = () => {
     setLoading(false);
     if (response.meta.requestStatus === "fulfilled") {
       dispatch(fetchUserProfile());
+      dispatch(
+        setUpdateUser({ username: response.payload.user.username })
+      );
       openNotification(response.payload.status, response.payload.message, "");
       setEditModal({ open: false, field: "" });
     } else {

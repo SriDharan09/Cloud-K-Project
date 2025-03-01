@@ -10,6 +10,7 @@ import EditProfile from "../pages/EditProfile";
 import Orders from "../pages/Orders";
 import BranchDetails from "../components/ordersDependency/BranchDetails.jsx";
 import CheckoutPage from "../pages/CheckoutPage.jsx";
+import OrderSummary from "../components/ordersDependency/OrderSummary.jsx";
 
 const AppRoutes = () => {
   return (
@@ -21,6 +22,7 @@ const AppRoutes = () => {
       <Route path="/order-food" element={<Orders />} />
       <Route path="/order-food/:branchSlug" element={<BranchDetails />} />
       <Route path="/cart/:id" element={<CheckoutPage />} />
+      <Route path="/order-summary" element={<OrderSummary />} />
       <Route path="/profile/edit" element={<EditProfile />} />
       {/* <Route path="/" element={<PrivateRoute element={<Home />} />} /> */}
       <Route path="/" element={<Home />} />

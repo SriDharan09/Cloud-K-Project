@@ -40,6 +40,7 @@ const reviewRouter = require("./routers/review");
 const offerRouter = require("./routers/offer");
 const profileRoutes = require("./routers/profile");
 const notificationRoutes = require("./routers/notificationRoutes");
+const cart = require("./routers/cartRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/categories", categoryRoutes);
@@ -52,6 +53,7 @@ app.use("/api/reviews", reviewRouter);
 app.use("/api/offers", offerRouter);
 app.use("/api/profile", profileRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/cart", cart);
 
 const PORT = process.env.PORT || 5000;
 

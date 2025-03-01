@@ -79,7 +79,7 @@ const CheckoutPage = () => {
         console.log(cart);
         dispatch(deleteCartAfterOrder({ BranchId: cart.BranchId }));
         message.success("Order placed successfully!");
-        navigate("/");
+        navigate("/order-summary", { state: { orderData: response.payload } });
       } else {
         message.error(response.payload?.message || "Failed to place order.");
       }

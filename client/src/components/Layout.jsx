@@ -15,7 +15,7 @@ const Layout = ({ children }) => {
   const { isModalOpen, closeModal } = useModal();
 
   return (
-    <div className="flex flex-col min-h-screen mt-15">
+    <div className="flex flex-col lg:mt-15 min-h-screen">
       {!is404 && <Navbar />}
       <main className="flex-grow">{children}</main>
       <Footer />

@@ -164,7 +164,7 @@ const EditProfile = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto mt-18 p-8 bg-white rounded-lg shadow-lg space-y-8">
+    <div className="max-w-6xl mx-auto p-8 bg-white rounded-lg shadow-lg space-y-8">
       {/* Profile & Username (Centered) */}
       <div className="flex flex-col items-center pb-6">
         <Avatar

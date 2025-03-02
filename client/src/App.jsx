@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { setUser } from "./redux/slice/authSlice";
 import AppRoutes from "./routes/AppRoutes";
 
+
 // Context Providers
 import { NotificationProvider } from "./context/NotificationProvider";
 import { LoaderProvider } from "./context/LoaderContext";
@@ -16,6 +17,7 @@ import Layout from "./components/Layout";
 
 // Styles
 import "./index.css";
+
 
 function App() {
   const dispatch = useDispatch();

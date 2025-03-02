@@ -9,13 +9,15 @@ const BreadcrumbNav = () => {
   return (
     <Breadcrumb
       separator={<RightOutlined />}
-      className="mb-4 text-lg rounded-lg bg-white py-4!"
-
+      className="mb-5! rounded-lg bg-white py-2 md:py-4 px-2 md:px-4"
     >
       {/* Home Link */}
       <Breadcrumb.Item>
-        <RouterLink to="/" className="flex items-center space-x-2 text-gray-700 hover:text-blue-500">
-          <HomeOutlined /> <span>Home</span>
+        <RouterLink
+          to="/"
+          className="flex items-center space-x-2 text-gray-700 hover:text-blue-500 text-sm md:text-md"
+        >
+          <HomeOutlined /> <span className="hidden md:inline">Home</span>
         </RouterLink>
       </Breadcrumb.Item>
 
@@ -26,12 +28,15 @@ const BreadcrumbNav = () => {
         const formattedPath = decodeURIComponent(path.replace(/-/g, " "));
 
         return isLast ? (
-          <Breadcrumb.Item key={path} className="text-gray-500 font-semibold">
+          <Breadcrumb.Item key={path} className="text-gray-500 font-semibold text-sm md:text-md">
             {formattedPath}
           </Breadcrumb.Item>
         ) : (
           <Breadcrumb.Item key={path}>
-            <RouterLink to={routeTo} className="text-gray-700 hover:text-blue-500">
+            <RouterLink
+              to={routeTo}
+              className="text-gray-700 hover:text-blue-500 text-sm md:text-md"
+            >
               {formattedPath}
             </RouterLink>
           </Breadcrumb.Item>

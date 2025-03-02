@@ -41,6 +41,7 @@ db.NotificationTemplate = require("./notificationTemplate")(
   DataTypes
 );
 db.Cart = require("./cart")(sequelize, DataTypes);
+db.OrderHistory = require("./orderHistory")(sequelize, DataTypes);
 
 db.Role.hasMany(db.User);
 db.User.belongsTo(db.Role);

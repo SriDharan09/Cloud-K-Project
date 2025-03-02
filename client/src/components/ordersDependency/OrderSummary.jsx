@@ -67,7 +67,7 @@ const OrderSummary = () => {
 
   return (
     <motion.div
-      className="max-w-4xl mx-auto p-5 bg-gray-50 rounded-lg shadow-lg"
+      className="max-w-4xl mx-auto mt-3 p-3 lg:p-5 bg-gray-50 rounded-lg shadow-lg"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -274,7 +274,7 @@ const OrderSummary = () => {
       ) : (
         // 📄 Basic Receipt (like a printed bill)
         <motion.div
-          className="flex justify-center items-center min-h-screen p-5"
+          className="flex justify-center items-center min-h-screen p-2 lg:p-5"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
@@ -415,7 +415,7 @@ const OrderSummary = () => {
       {/* 🎯 Action Buttons */}
       <Row
         justify="space-between"
-        className="mt-5 sticky bottom-0 bg-gray-50 p-3 shadow-md"
+        className="mt-5 sticky bottom-0 bg-gray-50 p-3 gap-4"
       >
         <Button
           type="primary"

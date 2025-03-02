@@ -12,21 +12,29 @@ import BranchDetails from "../components/ordersDependency/BranchDetails.jsx";
 import CheckoutPage from "../pages/CheckoutPage.jsx";
 import OrderSummary from "../components/ordersDependency/OrderSummary.jsx";
 
+//utils
+import ScrollToTop from "../utils/ScrollToTop.jsx";
+
 const AppRoutes = () => {
   return (
-    <Routes>
-      <Route path="*" element={<FouroFour />} />
-      <Route path="/help" element={<Help />} />
-      <Route path="/cart" element={<Cart />} />
-      <Route path="/offers" element={<Offers />} />
-      <Route path="/order-food" element={<Orders />} />
-      <Route path="/order-food/:branchSlug" element={<BranchDetails />} />
-      <Route path="/cart/:id" element={<CheckoutPage />} />
-      <Route path="/order-summary" element={<OrderSummary />} />
-      <Route path="/profile/edit" element={<EditProfile />} />
-      {/* <Route path="/" element={<PrivateRoute element={<Home />} />} /> */}
-      <Route path="/" element={<Home />} />
-    </Routes>
+    <>
+      {/* ScrollToTop component should be outside Routes */}
+      <ScrollToTop />
+
+      <Routes>
+        <Route path="*" element={<FouroFour />} />
+        <Route path="/help" element={<Help />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/offers" element={<Offers />} />
+        <Route path="/order-food" element={<Orders />} />
+        <Route path="/order-food/:branchSlug" element={<BranchDetails />} />
+        <Route path="/cart/:id" element={<CheckoutPage />} />
+        <Route path="/order-summary" element={<OrderSummary />} />
+        <Route path="/profile/edit" element={<EditProfile />} />
+        {/* <Route path="/" element={<PrivateRoute element={<Home />} />} /> */}
+        <Route path="/" element={<Home />} />
+      </Routes>
+    </>
   );
 };
 

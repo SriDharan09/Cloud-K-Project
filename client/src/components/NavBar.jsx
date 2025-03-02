@@ -33,7 +33,8 @@ const Navbar = () => {
   const { openModal } = useModal();
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifOpenMobile, setNotifOpenMobile] = useState(false);
+  const [notifOpenDesktop, setNotifOpenDesktop] = useState(false);
 
   const cart = useSelector((state) => state.cart.bucket);
   const isUserLoggedIn = useSelector((state) => state.auth.isUserLogin);
@@ -95,6 +96,21 @@ const Navbar = () => {
 
         {/* Hamburger & Cart for Mobile */}
         <div className="flex md:hidden items-center gap-3">
+          <Dropdown
+            menu={{ items: notificationItems }}
+            trigger={["click"]}
+            open={notifOpenMobile}
+            onOpenChange={setNotifOpenMobile}
+            overlayClassName="w-60 max-h-96 overflow-auto bg-white shadow-lg rounded-lg"
+          >
+            <StyledBadge badgeContent={unreadCount} color="error">
+              <Button
+                type="text"
+                icon={<BellOutlined />}
+                onClick={() => setNotifOpenMobile(!notifOpenMobile)}
+              />
+            </StyledBadge>
+          </Dropdown>
           <Link to="/cart">
             <IconButton aria-label="cart">
               <StyledBadge badgeContent={cartItemCount} color="primary">
@@ -123,15 +139,15 @@ const Navbar = () => {
               <Dropdown
                 menu={{ items: notificationItems }}
                 trigger={["click"]}
-                open={notifOpen}
-                onOpenChange={setNotifOpen}
+                open={notifOpenDesktop}
+                onOpenChange={setNotifOpenDesktop}
                 overlayClassName="w-80 max-h-96 overflow-auto bg-white shadow-lg rounded-lg"
               >
                 <StyledBadge badgeContent={unreadCount} color="error">
                   <Button
                     type="text"
                     icon={<BellOutlined />}
-                    onClick={() => setNotifOpen(!notifOpen)}
+                    onClick={() => setNotifOpenDesktop(!notifOpenDesktop)}
                   />
                 </StyledBadge>
               </Dropdown>
@@ -176,6 +192,7 @@ const Navbar = () => {
             <Link to="/help">
               <Button type="text">Help</Button>
             </Link>
+
             {isUserLoggedIn ? (
               <Avatar
                 src={user?.profileImage || undefined}

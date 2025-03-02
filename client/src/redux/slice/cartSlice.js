@@ -9,12 +9,13 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     addToCart: (state, action) => {
-      const { BranchId, MenuItemId, name, price, quantity, menuImage, isVeg } =
+      const { BranchId, MenuItemId, name,branchName, price, quantity, menuImage, isVeg } =
         action.payload;
 
       if (!state.bucket[BranchId]) {
         state.bucket[BranchId] = {
           BranchId,
+          branchName,
           items: [],
           customerName: "",
           customerContact: "",

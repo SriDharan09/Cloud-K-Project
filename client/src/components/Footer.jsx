@@ -3,11 +3,12 @@ import { FaFacebook, FaTwitter, FaInstagram, FaYoutube } from "react-icons/fa";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-white py-8 px-4 md:px-16">
-      <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-center md:text-left">
+    <footer className="bg-gray-900 sm:mb-20! lg:mb-0 md:mb-0 text-white py-10 px-6 sm:px-10 lg:px-20">
+      {/* Footer Grid Layout */}
+      <div className="container mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 text-center md:text-left">
         {/* About Us */}
         <div>
-          <h3 className="text-lg font-semibold mb-2">About Us</h3>
+          <h3 className="text-lg font-semibold mb-3">About Us</h3>
           <p className="text-sm text-gray-400">
             Cloud-K is your go-to platform for ordering delicious meals from top
             restaurants near you.
@@ -16,32 +17,30 @@ const Footer = () => {
 
         {/* Contact Us */}
         <div>
-          <h3 className="text-lg font-semibold mb-2">Contact Us</h3>
-          <p className="text-sm text-gray-400 my-2">
-            📍 25 South Street, Swamimalai, Kumbakonam
+          <h3 className="text-lg font-semibold mb-3">Contact Us</h3>
+          <p className="text-sm text-gray-400">
+            📍 25 South Street, Swamimalai
           </p>
-          <p className="text-sm text-gray-400 my-2">📞 +435 234590</p>
-          <p className="text-sm text-gray-400 my-2">
-            📧 cloudkhelpline@gmail.com
-          </p>
+          <p className="text-sm text-gray-400">📞 +435 234590</p>
+          <p className="text-sm text-gray-400">📧 cloudkhelpline@gmail.com</p>
         </div>
 
-        {/* Legal */}
+        {/* Legal Section */}
         <div>
-          <h3 className="text-lg font-semibold mb-2">Legal</h3>
-          <ul className="text-sm  text-gray-400 space-y-1">
+          <h3 className="text-lg font-semibold mb-3">Legal</h3>
+          <ul className="text-sm text-gray-400 space-y-2">
             <li>
-              <a href="#" className="hover:text-white my-2">
+              <a href="#" className="hover:text-white">
                 Terms of Service
               </a>
             </li>
             <li>
-              <a href="#" className="hover:text-white my-2">
+              <a href="#" className="hover:text-white">
                 Privacy Policy
               </a>
             </li>
             <li>
-              <a href="#" className="hover:text-white my-2">
+              <a href="#" className="hover:text-white">
                 Refund Policy
               </a>
             </li>
@@ -50,8 +49,8 @@ const Footer = () => {
 
         {/* Available Locations */}
         <div>
-          <h3 className="text-lg font-semibold mb-2">Available At</h3>
-          <ul className="text-sm text-gray-400 space-y-1">
+          <h3 className="text-lg font-semibold mb-3">Available At</h3>
+          <ul className="text-sm text-gray-400 space-y-2">
             <li>Swamimalai H/Q</li>
             <li>Kumbakonam</li>
             <li>Chennai</li>
@@ -60,18 +59,33 @@ const Footer = () => {
         </div>
       </div>
 
+      {/* Separator */}
+      <div className="border-t border-gray-700 my-6"></div>
+
       {/* Social Media Links */}
-      <div className="flex justify-center space-x-6 mt-6">
-        <a href="#" className="text-gray-400 hover:text-white text-xl">
+      <div className="flex justify-center space-x-6">
+        <a
+          href="#"
+          className="text-gray-400 hover:text-white text-2xl transition"
+        >
           <FaFacebook />
         </a>
-        <a href="#" className="text-gray-400 hover:text-white text-xl">
+        <a
+          href="#"
+          className="text-gray-400 hover:text-white text-2xl transition"
+        >
           <FaTwitter />
         </a>
-        <a href="#" className="text-gray-400 hover:text-white text-xl">
+        <a
+          href="#"
+          className="text-gray-400 hover:text-white text-2xl transition"
+        >
           <FaInstagram />
         </a>
-        <a href="#" className="text-gray-400 hover:text-white text-xl">
+        <a
+          href="#"
+          className="text-gray-400 hover:text-white text-2xl transition"
+        >
           <FaYoutube />
         </a>
       </div>

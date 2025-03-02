@@ -46,6 +46,39 @@ module.exports = (sequelize, DataTypes) => {
         min: 0,
       },
     },
+    category: {
+      type: DataTypes.STRING, // Category of the menu item (e.g., appetizers, main course)
+      allowNull: false,
+    },
+    ingredients: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    nutritionalInfo: {
+      type: DataTypes.JSON,
+      allowNull: true,
+    },
+    isVeg: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    spicinessLevel: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    servingSize: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    tags: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    menuPosition: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
   });
+
   return MenuItem;
 };

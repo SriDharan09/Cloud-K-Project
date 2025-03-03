@@ -39,7 +39,7 @@ const AsyncModal = ({
       </Button>
 
       {open && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
+        <div className="fixed inset-0 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm z-50">
           <div className="bg-white w-full max-w-md rounded-2xl shadow-lg p-6 animate-fade-in">
             {/* Title */}
             <h2 className="text-lg font-semibold text-gray-900">

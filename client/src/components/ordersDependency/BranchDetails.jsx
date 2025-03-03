@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Card,
   Typography,
@@ -18,9 +18,12 @@ import {
   Space,
   Tag,
 } from "antd";
+import dayjs from "dayjs";
 import { FacebookOutlined, InstagramOutlined } from "@ant-design/icons";
 import BreadcrumbNav from "./BreadcrumbNav";
 import MenuItemCard from "./MenuItemCard";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+dayjs.extend(customParseFormat);
 
 const { Title, Paragraph } = Typography;
 
@@ -37,6 +40,27 @@ const BranchDetails = () => {
   const branchId = Number(branchSlug.split("-").pop());
   const branch = branches.find((b) => b.id === branchId);
   if (!branch) return <p className="text-gray-500">Branch not found</p>;
+
+  const branchStatus = useMemo(() => {
+    if (!branch.opening_hours) return "closed";
+
+    const today = dayjs().format("dddd");
+    const hours = JSON.parse(branch.opening_hours)[today];
+
+    if (!hours) return "closed";
+
+    const [openTimeStr, closeTimeStr] = hours.split(" - ");
+
+    let openTime = dayjs(openTimeStr, "hh:mm A");
+    let closeTime = dayjs(closeTimeStr, "hh:mm A");
+
+    if (closeTimeStr.includes("AM") && closeTime.hour() < openTime.hour()) {
+      closeTime = closeTime.add(1, "day");
+    }
+
+    const now = dayjs();
+    return now.isAfter(openTime) && now.isBefore(closeTime) ? "open" : "closed";
+  }, [branch.opening_hours]);
 
   let branchMenu = menuItems.filter((item) => item.BranchId === branchId);
   if (filterType === "veg") {
@@ -93,8 +117,8 @@ const BranchDetails = () => {
                   className="text-sm md:text-base "
                   label="Status"
                 >
-                  <Tag color={branch.status === "open" ? "green" : "red"}>
-                    {branch.status.toUpperCase()}
+                  <Tag color={branchStatus === "open" ? "green" : "red"}>
+                    {branchStatus.toUpperCase()}
                   </Tag>
                 </Descriptions.Item>
               </div>
@@ -146,28 +170,6 @@ const BranchDetails = () => {
                   </Button>
                 )}
               </Space>
-              {/* <Row gutter={[16, 16]} className="mt-2">
-                <Col xs={24} sm={12}>
-                  <Title level={5}>Payment Methods</Title>
-                  <Space wrap>
-                    {JSON.parse(branch.payment_methods).map((method) => (
-                      <Tag key={method} color="blue">
-                        {method}
-                      </Tag>
-                    ))}
-                  </Space>
-                </Col>
-                <Col xs={24} sm={12}>
-                  <Title level={5}>Amenities</Title>
-                  <Space wrap>
-                    {JSON.parse(branch.amenities).map((amenity) => (
-                      <Tag key={amenity} color="purple">
-                        {amenity}
-                      </Tag>
-                    ))}
-                  </Space>
-                </Col>
-              </Row> */}
             </div>
             <Title level={5} className="mt-4">
               Popular Dishes
@@ -204,7 +206,7 @@ const BranchDetails = () => {
       </Title>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
         {branchMenu.length > 0 ? (
-          branchMenu.map((item) => <MenuItemCard key={item.id} item={item} />)
+          branchMenu.map((item) => <MenuItemCard key={item.id} item={item} branchStatus={branchStatus} />)
         ) : (
           <Empty className="my-6" description="No menu items available." />
         )}

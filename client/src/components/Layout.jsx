@@ -5,6 +5,7 @@ import { Modal } from "antd";
 import Login from "../pages/Login";
 import { useModal } from "../context/ModalContext";
 import { useLocation } from "react-router-dom";
+import "../styles/Login.css";
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -26,7 +27,7 @@ const Layout = ({ children }) => {
         footer={null}
         centered
         width={500}
-        className="absolute inset-0 flex items-center w-90! justify-center backdrop-blur-[4px] bg-white/20 text-black z-10"
+        className="absolute inset-0 flex items-center w-90! justify-center glass-modal bg-white/70 text-black z-10"
       >
         <Login closeModal={closeModal} isModalOpen={isModalOpen} />
       </Modal>

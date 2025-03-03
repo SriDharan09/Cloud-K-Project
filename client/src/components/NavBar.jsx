@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   UserOutlined,
@@ -34,6 +34,7 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpenMobile, setNotifOpenMobile] = useState(false);
+  const menuRef = useRef(null);
   const [notifOpenDesktop, setNotifOpenDesktop] = useState(false);
 
   const cart = useSelector((state) => state.cart.bucket);
@@ -48,6 +49,21 @@ const Navbar = () => {
   const totalItems = Object.values(cart).reduce((total, branch) => {
     return total + branch.items.reduce((sum, item) => sum + item.quantity, 0);
   }, 0);
+  const handleClickOutside = (event) => {
+    if (menuRef.current && !menuRef.current.contains(event.target)) {
+      setMenuOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    if (menuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
+
   const handleNotificationClick = (id) => {
     dispatch(markAsReadAsync(id));
   };
@@ -81,6 +97,9 @@ const Navbar = () => {
             ),
           },
         ];
+  const closeMenu = () => {
+    setMenuOpen(false);
+  };
 
   return (
     <nav className="fixed bottom-0 w-full z-50 bg-white/80 backdrop-blur-sm animate-fade-in shadow-xl border-t border-gray-300 transition-all duration-300 md:top-0 md:bottom-auto">
@@ -96,21 +115,23 @@ const Navbar = () => {
 
         {/* Hamburger & Cart for Mobile */}
         <div className="flex md:hidden items-center gap-3">
-          <Dropdown
-            menu={{ items: notificationItems }}
-            trigger={["click"]}
-            open={notifOpenMobile}
-            onOpenChange={setNotifOpenMobile}
-            overlayClassName="w-60 max-h-96 overflow-auto bg-white shadow-lg rounded-lg"
-          >
-            <StyledBadge badgeContent={unreadCount} color="error">
-              <Button
-                type="text"
-                icon={<BellOutlined />}
-                onClick={() => setNotifOpenMobile(!notifOpenMobile)}
-              />
-            </StyledBadge>
-          </Dropdown>
+          {isUserLoggedIn && (
+            <Dropdown
+              menu={{ items: notificationItems }}
+              trigger={["click"]}
+              open={notifOpenMobile}
+              onOpenChange={setNotifOpenMobile}
+              overlayClassName="w-60 max-h-96 overflow-auto bg-white shadow-lg rounded-lg"
+            >
+              <StyledBadge badgeContent={unreadCount} color="error">
+                <Button
+                  type="text"
+                  icon={<BellOutlined />}
+                  onClick={() => setNotifOpenMobile(!notifOpenMobile)}
+                />
+              </StyledBadge>
+            </Dropdown>
+          )}
           <Link to="/cart">
             <IconButton aria-label="cart">
               <StyledBadge badgeContent={cartItemCount} color="primary">
@@ -180,16 +201,17 @@ const Navbar = () => {
       <AnimatePresence>
         {menuOpen && (
           <motion.div
+            ref={menuRef}
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed bottom-16 left-0 w-full bg-white p-4 shadow-lg md:hidden flex flex-col items-center gap-4"
+            className="fixed bottom-16 left-0 w-full bg-white p-5 shadow-2xl md:hidden flex flex-col items-center gap-4 rounded-t-2xl border-t border-gray-600 backdrop-blur-lg"
           >
-            <Link to="/offers">
+            <Link to="/offers" onClick={closeMenu}>
               <Button type="text">Offers</Button>
             </Link>
-            <Link to="/help">
+            <Link to="/help" onClick={closeMenu}>
               <Button type="text">Help</Button>
             </Link>
 
@@ -199,10 +221,20 @@ const Navbar = () => {
                 icon={!user?.profileImage && <UserOutlined />}
                 className="cursor-pointer"
                 size="large"
-                onClick={() => setProfileOpen(true)}
+                onClick={() => {
+                  setProfileOpen(true);
+                  closeMenu();
+                }}
               />
             ) : (
-              <Button onClick={openModal} type="text" icon={<UserOutlined />}>
+              <Button
+                onClick={() => {
+                  openModal();
+                  closeMenu();
+                }}
+                type="text"
+                icon={<UserOutlined />}
+              >
                 Sign In
               </Button>
             )}

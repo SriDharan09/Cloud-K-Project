@@ -6,7 +6,7 @@ import { useModal } from "../../context/ModalContext";
 
 const { Title, Paragraph } = Typography;
 
-const MenuItemCard = ({ item }) => {
+const MenuItemCard = ({ item, branchStatus }) => {
   const dispatch = useDispatch();
   const { openModal } = useModal();
   const isUserLogin = useSelector((state) => state.auth.isUserLogin);
@@ -30,7 +30,6 @@ const MenuItemCard = ({ item }) => {
     );
   };
 
-  // Spice level mapping with tooltip on hover
   const getSpiceLevelIndicator = (level) => {
     switch (level) {
       case "No Spice":
@@ -60,14 +59,12 @@ const MenuItemCard = ({ item }) => {
     >
       {/* Left Section: Details */}
       <div className="flex-1 pr-3">
-        {/* Veg/Non-Veg Indicator */}
         <div
           className={`absolute top-2 left-2 w-3 h-3 rounded-full ${
             item.isVeg ? "bg-green-500" : "bg-red-500"
           }`}
         />
 
-        {/* Dish Name */}
         <div className="flex items-baseline gap-2">
           <Title level={5} className="mb-0 text-sm md:text-base font-medium">
             {item.name}
@@ -79,7 +76,6 @@ const MenuItemCard = ({ item }) => {
           </Tooltip>
         </div>
 
-        {/* Price & Rating Row */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-1">
           <span className="font-semibold mb-2 text-sm md:text-base">
             ₹
@@ -102,7 +98,6 @@ const MenuItemCard = ({ item }) => {
           />
         </div>
 
-        {/* Cuisine & Spice Level with Tooltip */}
         <div className="flex gap-2 mt-1 text-xs py-2 font-semibold">
           <span className="bg-blue-100 text-blue-600 px-2 py-1 rounded-lg">
             {item.Category?.name || "🍽️ Cuisine"}
@@ -114,12 +109,10 @@ const MenuItemCard = ({ item }) => {
           </Tooltip>
         </div>
 
-        {/* Serving Size */}
         <div className="text-gray-500 text-xs mt-2">
           <span>Serving: {item.servingSize}</span>
         </div>
 
-        {/* Description */}
         <Paragraph className="text-gray-500 text-xs mt-1 mb-0 hidden md:block">
           {item.description.length > 50
             ? item.description.slice(0, 50) + "..."
@@ -137,14 +130,22 @@ const MenuItemCard = ({ item }) => {
           height={80}
           preview={{ src: item.menuImage }}
         />
-        <Button
-          type="primary"
-          className="bg-green-500 border-none text-white text-xs rounded-md px-2 py-1 mt-2 w-full"
-          onClick={handleAddToCart}
-          size="small"
+        <Tooltip
+          title={branchStatus === "closed" ? "Branch is closed now" : ""}
         >
-          ADD
-        </Button>
+          <span className="w-full">
+            <Button
+              type="primary"
+              className={`bg-green-500 border-none text-white text-xs rounded-md px-2 py-1 mt-2 w-full ${
+                branchStatus === "closed" ? "cursor-not-allowed opacity-50" : ""
+              }`}
+              onClick={branchStatus === "closed" ? undefined : handleAddToCart}
+              size="small"
+            >
+              ADD
+            </Button>
+          </span>
+        </Tooltip>
         <span className="text-gray-400 text-xs mt-1">
           {item.isSpecial ? "Chef's Special" : "Customisable"}
         </span>

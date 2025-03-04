@@ -6,7 +6,9 @@ const {
   Branch,
   Offer,
   Review,
+  OrderHistory,
 } = require("../models");
+
 const orderLogger = require("../utils/logger/ordersLogger");
 const crypto = require("crypto");
 const { formatOrderResponse } = require("../utils/orderFormatter");
@@ -311,7 +313,7 @@ exports.createOrder = async (req, res) => {
     });
 
     // Structured Response
-    res.json({
+    const response = {
       status: 200,
       success: true,
       title: "Order placed successfully",
@@ -332,12 +334,14 @@ exports.createOrder = async (req, res) => {
       branchDetails: {
         branchId: branch.id,
         branchName: branch.name,
+        branchImage: branch.mainImage,
         branchAddress: branch.address,
       },
       userDetails: {
         userId: UserId,
         username: req.user.username,
         email: req.user.email,
+        userImage: req.user.userImage,
         CifId: performedBy,
       },
       items: await Promise.all(
@@ -349,6 +353,7 @@ exports.createOrder = async (req, res) => {
             quantity: item.quantity,
             price: menuItem.price,
             total: menuItem.price * item.quantity,
+            menuImage: menuItem.menuImage,
           };
         })
       ),
@@ -379,7 +384,18 @@ exports.createOrder = async (req, res) => {
             ? parseFloat(originalPrice.toFixed(2))
             : 0.0,
       },
+    };
+
+    await OrderHistory.create({
+      orderId: order.id,
+      userCIFId: performedBy,
+      status: order.status,
+      snapshot: response,
+      recordedAt: new Date(),
     });
+
+    // Send response
+    res.json(response);
   } catch (error) {
     orderLogger.error("Error creating order", { requestInfo, error });
     res.status(400).json({ error: error.message });
@@ -1169,6 +1185,52 @@ const updateOrderStatuses = async () => {
         console.log(
           `✅ Order ${update.id} updated to ${update.status}, Payment Status: ${update.paymentStatus}, Completed At: ${update.completedAt}`
         );
+        const orderHistory = await OrderHistory.findOne({
+          where: { orderId: update.id },
+        });
+
+        if (orderHistory) {
+          let snapshot = orderHistory.snapshot;
+
+          // ✅ Ensure snapshot is a valid JSON object
+          if (typeof snapshot === "string") {
+            try {
+              snapshot = JSON.parse(snapshot);
+            } catch (err) {
+              console.error(
+                `❌ Error parsing snapshot for OrderHistory ${orderHistory.id}:`,
+                err
+              );
+              continue; // Skip this order if snapshot is corrupted
+            }
+          }
+
+          if (typeof snapshot !== "object" || snapshot === null) {
+            console.error(
+              `❌ Invalid snapshot format for OrderHistory ${orderHistory.id}, skipping update.`
+            );
+            continue;
+          }
+
+          // ✅ Update only status & paymentStatus inside snapshot
+          if (snapshot.orderDetails)
+            snapshot.orderDetails.status = update.status;
+          if (snapshot.paymentDetails)
+            snapshot.paymentDetails.paymentStatus = update.paymentStatus;
+
+          // ✅ Update orderHistory with new status & modified snapshot
+          await OrderHistory.update(
+            {
+              status: update.status,
+              snapshot: snapshot,
+            },
+            { where: { orderId: update.id } }
+          );
+
+          console.log(
+            `📌 Order History Updated | Order: ${update.id} | Status: ${update.status}`
+          );
+        }
         if (update.notificationKey) {
           console.log(update);
           await notifyUser(update.orderBy, update.notificationKey, {

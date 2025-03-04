@@ -7,10 +7,9 @@ const db = require("./models");
 const { initializeSocket } = require("./utils/socket");
 const { startNotificationJobs } = require("./utils/notificationService");
 
-
 const app = express();
 const server = http.createServer(app);
-const io = initializeSocket(server); 
+const io = initializeSocket(server);
 app.set("io", io);
 startNotificationJobs();
 
@@ -41,6 +40,7 @@ const offerRouter = require("./routers/offer");
 const profileRoutes = require("./routers/profile");
 const notificationRoutes = require("./routers/notificationRoutes");
 const cart = require("./routers/cartRoutes");
+const orderHistory = require("./routers/orderHistory");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/categories", categoryRoutes);
@@ -54,6 +54,7 @@ app.use("/api/offers", offerRouter);
 app.use("/api/profile", profileRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/cart", cart);
+app.use("/api/orderHistory", orderHistory);
 
 const PORT = process.env.PORT || 5000;
 

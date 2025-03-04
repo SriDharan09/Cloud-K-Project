@@ -59,7 +59,7 @@ const BranchDetails = () => {
     }
 
     const now = dayjs();
-    return now.isAfter(openTime) && now.isBefore(closeTime) ? "open" : "closed";
+    return now.isAfter(openTime) && now.isBefore(closeTime) ? "open" : "open";
   }, [branch.opening_hours]);
 
   let branchMenu = menuItems.filter((item) => item.BranchId === branchId);

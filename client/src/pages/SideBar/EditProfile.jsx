@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector, shallowEqual } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { useModal } from "../context/ModalContext";
-import ProfileSkeleton from "../components/Skeleton/ProfileSkeleton";
-import { useNotification } from "../context/NotificationProvider";
-import { useLoader } from "../context/LoaderContext";
+import { useModal } from "../../context/ModalContext";
+import ProfileSkeleton from "../../components/Skeleton/ProfileSkeleton";
+import { useNotification } from "../../context/NotificationProvider";
+import { useLoader } from "../../context/LoaderContext";
 import {
   fetchUserProfile,
   updateProfileAsync,
   changePasswordAsync,
   uploadProfileImageAsync,
-} from "../redux/slice/profileSlice";
-import { setUpdateUser } from "../redux/slice/authSlice";
+} from "../../redux/slice/profileSlice";
+import { setUpdateUser } from "../../redux/slice/authSlice";
 import {
   Avatar,
   Button,

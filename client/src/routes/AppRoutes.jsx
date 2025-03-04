@@ -6,7 +6,7 @@ import FouroFour from "../components/Errors/FouroFour.jsx";
 import Help from "../pages/Help";
 import Cart from "../pages/Cart";
 import Offers from "../pages/Offers";
-import EditProfile from "../pages/EditProfile";
+import EditProfile from "../pages/SideBar/EditProfile";
 import Orders from "../pages/Orders";
 import BranchDetails from "../components/ordersDependency/BranchDetails.jsx";
 import CheckoutPage from "../pages/CheckoutPage.jsx";
@@ -14,6 +14,7 @@ import OrderSummary from "../components/ordersDependency/OrderSummary.jsx";
 
 //utils
 import ScrollToTop from "../utils/ScrollToTop.jsx";
+import OrderHistory from "../pages/SideBar/OrderHistory.jsx";
 
 const AppRoutes = () => {
   return (
@@ -31,6 +32,7 @@ const AppRoutes = () => {
         <Route path="/cart/:id" element={<CheckoutPage />} />
         <Route path="/order-summary" element={<OrderSummary />} />
         <Route path="/profile/edit" element={<EditProfile />} />
+        <Route path="/profile/order-history" element={<OrderHistory />} />
         {/* <Route path="/" element={<PrivateRoute element={<Home />} />} /> */}
         <Route path="/" element={<Home />} />
       </Routes>

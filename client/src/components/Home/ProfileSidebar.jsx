@@ -12,7 +12,7 @@ import {
   SettingOutlined,
   CustomerServiceOutlined,
 } from "@ant-design/icons";
-import { useDispatch, useSelector, shallowEqual} from "react-redux";
+import { useDispatch, useSelector, shallowEqual } from "react-redux";
 import { logout } from "../../redux/slice/authSlice";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -39,7 +39,7 @@ const ProfileSidebar = ({ open, onClose }) => {
     {
       title: "Order History",
       icon: <HistoryOutlined />,
-      path: "/profile/orders",
+      path: "/profile/order-history",
     },
     {
       title: "My Addresses",

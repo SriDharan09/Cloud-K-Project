@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { userLogin, userRegister } from "../../api/authApi.js";
 import { fetchNotifications } from "./notificationSlice.js";
+import { resetStore } from "./resetSlice.js";
 
 const initialState = {
   user: null,
@@ -63,22 +64,8 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     logout: (state) => {
-      state.user = null;
-      state.token = null;
-      state.statusCode = null;
-      state.errorCode = null;
-      state.loading = false;
-      state.email = "";
-      state.error = null;
-      state.preLogin = true;
-      state.isAdmin = false;
-      state.token = null;
-      state.isUserLogin = false;
-
-      localStorage.removeItem("user");
-      localStorage.removeItem("role");
-      localStorage.removeItem("token");
-      localStorage.removeItem("CIFID");
+      localStorage.clear();
+      return initialState;
     },
     setUser: (state, action) => {
       state.user = action.payload.user;
@@ -129,7 +116,8 @@ const authSlice = createSlice({
         state.loading = false;
         state.statusCode = action.payload.status;
         state.error = action.payload || "Signup failed";
-      });
+      })
+      .addCase(resetStore, () => initialState);
   },
 });
 

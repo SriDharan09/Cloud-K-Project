@@ -16,6 +16,7 @@ import { useDispatch, useSelector, shallowEqual } from "react-redux";
 import { logout } from "../../redux/slice/authSlice";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { resetStore } from "../../redux/slice/resetSlice";
 
 const ProfileSidebar = ({ open, onClose }) => {
   const dispatch = useDispatch();
@@ -24,6 +25,7 @@ const ProfileSidebar = ({ open, onClose }) => {
 
   const handleLogout = () => {
     dispatch(logout());
+    dispatch(resetStore());
     onClose();
     navigate("/");
   };

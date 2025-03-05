@@ -1,5 +1,6 @@
 import { getCategories } from "../../api/categoryApi";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { resetStore } from "./resetSlice.js";
 
 const initialState = {
   statusCode: null,
@@ -36,12 +37,14 @@ const categorySlice = createSlice({
         state.statusCode = action.payload.status;
         state.categoryDetails = action.payload;
       }),
-      builder.addCase(fetchCategoryDetails.rejected, (state, action) => {
-        state.loading = false;
-        state.categoryDetails = [];
-        state.statusCode = action.payload.status;
-        state.error = action.payload;
-      });
+      builder
+        .addCase(fetchCategoryDetails.rejected, (state, action) => {
+          state.loading = false;
+          state.categoryDetails = [];
+          state.statusCode = action.payload.status;
+          state.error = action.payload;
+        })
+        .addCase(resetStore, () => initialState);
   },
 });
 

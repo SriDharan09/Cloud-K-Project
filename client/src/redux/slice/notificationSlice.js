@@ -1,4 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { resetStore } from "./resetSlice.js";
+
 import {
   getUserNotifications,
   markNotificationAsRead,
@@ -104,7 +106,8 @@ const notificationSlice = createSlice({
         state.notifications = state.notifications.filter(
           (notification) => notification.id !== action.meta.arg
         );
-      });
+      })
+      .addCase(resetStore, () => initialState);
   },
 });
 

@@ -4,7 +4,8 @@ import {
   updateUserProfile,
   changeUserPassword,
   uploadProfileImage,
-} from "../../api/profileApi"; // Importing API functions
+} from "../../api/profileApi";
+import { resetStore } from "./resetSlice.js";
 
 const initialState = {
   user: null,
@@ -20,7 +21,7 @@ export const fetchUserProfile = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const state = thunkAPI.getState();
-      const token = state.auth.token; // ✅ Get token from Redux
+      const token = state.auth.token; 
 
       if (!token) {
         return thunkAPI.rejectWithValue({ message: "Authentication token missing" });
@@ -184,7 +185,8 @@ const profileSlice = createSlice({
         state.error = action.payload?.message || "Failed to upload image";
         state.statusCode = action.payload?.statusCode || 500;
         state.loading = false;
-      });
+      })
+      .addCase(resetStore, () => initialState);
   },
 });
 

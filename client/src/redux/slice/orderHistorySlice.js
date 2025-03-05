@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { getOrderHistory } from "../../api/orderHistoryApi";
+import { resetStore } from "./resetSlice.js";
 
 const initialState = {
   orders: [],
@@ -74,7 +75,8 @@ const orderHistorySlice = createSlice({
           action.payload?.message || "Failed to fetch order history";
         state.statusCode = action.payload?.statusCode || 500;
         state.loading = false;
-      });
+      })
+      .addCase(resetStore, () => initialState);
   },
 });
 

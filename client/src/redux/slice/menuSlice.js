@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { getMenus } from "../../api/menuApi";
+import { resetStore } from "./resetSlice.js";
 
 const initialState = {
   statusCode: null,
@@ -41,7 +42,8 @@ const menuSlice = createSlice({
         state.menuDetails = [];
         state.statusCode = action.payload.status;
         state.error = action.payload;
-      });
+      })
+      .addCase(resetStore, () => initialState);
   },
 });
 

@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { resetStore } from "./resetSlice.js";
 
 const initialState = {
   bucket: {},
@@ -9,8 +10,16 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     addToCart: (state, action) => {
-      const { BranchId, MenuItemId, name,branchName, price, quantity, menuImage, isVeg } =
-        action.payload;
+      const {
+        BranchId,
+        MenuItemId,
+        name,
+        branchName,
+        price,
+        quantity,
+        menuImage,
+        isVeg,
+      } = action.payload;
 
       if (!state.bucket[BranchId]) {
         state.bucket[BranchId] = {
@@ -95,6 +104,9 @@ const cartSlice = createSlice({
       if (state.bucket[BranchId]) {
         delete state.bucket[BranchId];
       }
+    },
+    extraReducers: (builder) => {
+      builder.addCase(resetStore, () => initialState); 
     },
   },
 });

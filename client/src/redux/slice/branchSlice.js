@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { getBranchDetails } from "../../api/branchApi";
+import { resetStore } from "./resetSlice.js";
 
 const initialState = {
   statusCode: null,
@@ -42,7 +43,8 @@ const branchSlice = createSlice({
         state.branchDetails = [];
         state.statusCode = action.payload.status;
         state.error = action.payload;
-      });
+      })
+      .addCase(resetStore, () => initialState);
   },
 });
 

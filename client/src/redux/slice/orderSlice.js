@@ -7,6 +7,7 @@ import {
   updateOrderStatus,
   deleteOrder,
 } from "../../api/ordersApi";
+import { resetStore } from "./resetSlice.js";
 
 const initialState = {
   orders: [],
@@ -61,8 +62,8 @@ export const createOrderAsync = createAsyncThunk(
   "orders/create",
   async (orderData, thunkAPI) => {
     try {
-        console.log(orderData + " created");
-        
+      console.log(orderData + " created");
+
       const state = thunkAPI.getState();
       const token = state.auth.token;
       if (!token)
@@ -149,7 +150,8 @@ const orderSlice = createSlice({
       })
       .addCase(deleteOrderAsync.fulfilled, (state, action) => {
         state.orders = state.orders.filter((o) => o.id !== action.meta.arg);
-      });
+      })
+      .addCase(resetStore, () => initialState);
   },
 });
 

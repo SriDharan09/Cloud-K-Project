@@ -9,8 +9,8 @@ let seeders = [
   "usersSeeder.js",
   "CustomizationSeeder.js",
 ];
- //seeders.splice(-3);
- seeders.splice(-7);
+//seeders.splice(-3);
+seeders.splice(-7);
 
 async function runSeeders() {
   for (const seeder of seeders) {
@@ -26,7 +26,7 @@ async function runSeeders() {
             console.log(stdout);
             resolve();
           }
-        }
+        },
       );
     });
     console.log(`⚡ ${seeder} executed successfully! ⚡`);

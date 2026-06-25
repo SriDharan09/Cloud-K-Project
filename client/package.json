@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -28,6 +28,7 @@
     "react-router-dom": "^7.1.5",
     "redux-persist": "^6.0.0",
     "socket.io-client": "^4.8.1",
+    "swiper": "^11.2.5",
     "tailwindcss": "^4.0.3"
   },
   "devDependencies": {

@@ -10,7 +10,7 @@ import { useNotification } from "../context/NotificationProvider";
 import AsyncModal from "../components/Modal/AsyncModal";
 import { userVerification } from "../api/authApi";
 import { useLoader } from "../context/LoaderContext";
-import "../styles/Login.css";
+import "../styles/login.css";
 import { Stepper, Step, StepLabel } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import Check from "@mui/icons-material/Check";
@@ -112,7 +112,7 @@ const Login = () => {
       openNotification(
         result.payload.status,
         result.payload.title,
-        result.payload.message
+        result.payload.message,
       );
     }
   };
@@ -131,7 +131,7 @@ const Login = () => {
       openNotification(
         result.payload.status,
         result.payload.title,
-        result.payload.message
+        result.payload.message,
       );
       if (result.payload.status === 200 || result.payload.status === 201) {
         setCurrentStep(1);

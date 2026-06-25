@@ -1,0 +1,36 @@
+services:
+  server:
+    build:
+      context: ./server
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./server/.env
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    develop:
+      watch:
+        - action: sync
+          path: ./server
+          target: /app
+        - action: rebuild
+          path: ./server/package.json
+
+  client:
+    build:
+      context: ./client
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    develop:
+      watch:
+        - action: sync
+          path: ./client
+          target: /app
+        - action: rebuild
+          path: ./client/package.json

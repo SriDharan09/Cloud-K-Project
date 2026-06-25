@@ -22,7 +22,7 @@ const CategoryList = ({ categories }) => {
         <motion.div
           className="flex space-x-8 w-max"
           animate={{ x: ["0%", "-50%"] }}
-          transition={{ repeat: Infinity, duration: 25, ease: "linear" }} 
+          transition={{ repeat: Infinity, duration: 25, ease: "linear" }}
         >
           {categories.concat(categories).map((category, index) => (
             <motion.div

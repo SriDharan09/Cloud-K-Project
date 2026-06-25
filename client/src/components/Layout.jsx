@@ -5,7 +5,7 @@ import { Modal } from "antd";
 import Login from "../pages/Login";
 import { useModal } from "../context/ModalContext";
 import { useLocation } from "react-router-dom";
-import "../styles/Login.css";
+import "../styles/login.css";
 
 const Layout = ({ children }) => {
   const location = useLocation();

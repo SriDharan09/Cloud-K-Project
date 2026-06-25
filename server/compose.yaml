@@ -1,0 +1,24 @@
+services:
+  server:
+    build: .
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./server/.env
+    # develop:
+    #   watch:
+    #     - action: sync
+    #       path: ./server
+    #       target: /app
+    #     - action: rebuild
+    #       path: package.json
+  #   depends_on:
+  #     - mysql
+
+  # mysql:
+  #   image: mysql:8
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: 1234
+  #     MYSQL_DATABASE: cloud-k-project
+  #   ports:
+  #     - "3306:3306"

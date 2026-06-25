@@ -38,10 +38,10 @@ db.AuditLog = require("./auditLog")(sequelize, DataTypes);
 db.Notification = require("./notification")(sequelize, DataTypes);
 db.NotificationTemplate = require("./notificationTemplate")(
   sequelize,
-  DataTypes
+  DataTypes,
 );
-db.Cart = require("./cart")(sequelize, DataTypes);
 db.OrderHistory = require("./orderHistory")(sequelize, DataTypes);
+db.CartItem = require("./cartItem")(sequelize, DataTypes);
 
 db.Role.hasMany(db.User);
 db.User.belongsTo(db.Role);
@@ -73,8 +73,12 @@ db.Review.belongsTo(db.MenuItem);
 db.User.hasMany(db.UserAddress);
 db.UserAddress.belongsTo(db.User);
 
-// To clear the data from the table :
+db.CartItem.belongsTo(db.MenuItem, { foreignKey: "menuItemId" });
+db.MenuItem.hasMany(db.CartItem, { foreignKey: "menuItemId" });
+db.CartItem.belongsTo(db.Branch, { foreignKey: "branchId" });
+db.Branch.hasMany(db.CartItem, { foreignKey: "branchId" });
 
+// To clear the data from the table :
 // resetDatabase();
 // truncateTable();
 

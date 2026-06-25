@@ -30,16 +30,16 @@ const notifyUser = async (
   title,
   message,
   type = "general",
-  data = null
+  data = null,
 ) => {
   try {
-    const users = await User.findAll({
+    const users = await User.findOne({
       where: { isActive: true },
       attributes: ["userCIFId"],
     });
     if (!users) {
       console.warn(
-        `⚠️ User ${userCIFId} not found or inactive. Skipping notification.`
+        `⚠️ User ${userCIFId} not found or inactive. Skipping notification.`,
       );
       return null;
     }
@@ -79,10 +79,12 @@ const notifyMultipleUsers = async (
   title,
   message,
   type = "general",
-  data = null
+  data = null,
 ) => {
   await Promise.all(
-    userCIFIds.map((id) => notifyUser(id, null, {}, title, message, type, data))
+    userCIFIds.map((id) =>
+      notifyUser(id, null, {}, title, message, type, data),
+    ),
   );
 };
 
@@ -131,7 +133,7 @@ const sendBulkPromotion = async () => {
       const replacements = {};
 
       await notifyUser(user.userCIFId, randomTemplate.key, replacements);
-    })
+    }),
   );
 
   console.log(`✅ Sent promotional notifications to ${users.length} users.`);

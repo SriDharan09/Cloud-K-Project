@@ -102,7 +102,7 @@ module.exports = (sequelize, DataTypes) => {
             "id",
             "username",
             "email",
-            "profilePictureUrl",
+            "profileImage",
             "phoneNumber",
           ],
         },
@@ -118,7 +118,7 @@ module.exports = (sequelize, DataTypes) => {
           ],
         },
       },
-    }
+    },
   );
 
   return User;

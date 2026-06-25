@@ -41,6 +41,7 @@ const profileRoutes = require("./routers/profile");
 const notificationRoutes = require("./routers/notificationRoutes");
 const cart = require("./routers/cartRoutes");
 const orderHistory = require("./routers/orderHistory");
+const orderStatusWorker = require("./workers/orderStatusWorker");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/categories", categoryRoutes);
@@ -59,6 +60,7 @@ app.use("/api/orderHistory", orderHistory);
 const PORT = process.env.PORT || 5000;
 
 db.sequelize.sync().then(() => {
+  orderStatusWorker.start();
   server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });

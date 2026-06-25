@@ -124,8 +124,11 @@ module.exports = (sequelize, DataTypes) => {
             "branch_type",
           ],
         },
+        basicInfo: {
+          attributes: ["id", "name", "address", "phone_number", "mainImage"],
+        },
       },
-    }
+    },
   );
 
   return Branch;

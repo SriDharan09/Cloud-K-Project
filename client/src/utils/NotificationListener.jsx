@@ -1,54 +1,58 @@
-import { useEffect } from "react";
-import { io } from "socket.io-client";
+import { useEffect, useRef } from "react";
+import socket from "./socket";
 import { useSelector, useDispatch } from "react-redux";
 import { addNotification } from "../redux/slice/notificationSlice";
 import { useNotification } from "../context/NotificationProvider";
 
-const socket = io("http://localhost:5000", {
-  transports: ["websocket"],
-  autoConnect: false,
-});
-
 const NotificationListener = () => {
-  const userCIFId = useSelector((state) => state.auth.user?.cifId);
+  const userCIFId = useSelector((state) => state.auth.user);
+  const token = useSelector((state) => state.auth.token);
+
   const dispatch = useDispatch();
   const openNotification = useNotification();
 
   useEffect(() => {
-    if (userCIFId) {
-      socket.connect();
+    if (!userCIFId || !token) {
+      socket.disconnect();
+      return;
+    }
+    console.log("📡 Socket connecting...");
+    console.log("📡 Token:", token);
+    socket.auth = { token };
+    socket.connect();
 
-      const registerUser = () => {
-        console.log("📡 Registering user:", userCIFId);
-        socket.emit("registerUser", userCIFId);
-      };
+    socket.on("connect", () => {
+      console.log("✅ Socket connected:", socket.id);
+    });
 
-      registerUser();
-      socket.on("connect", registerUser);
-      socket.on("notification", (data) => {
-        console.log("📩 New notification received:", data);
-        openNotification(data.status || 200, data.title, data.message, {
-          placement: "top",
-          duration: 5,
-          isSocket: true,
-        });
-        dispatch(addNotification(data));
+    socket.on("connect_error", (err) => {
+      console.log("❌ Socket error:", err.message);
+    });
+
+    socket.on("notification", (data) => {
+      console.log("📩 Notification:", data);
+
+      openNotification(data.status || 200, data.title, data.message, {
+        placement: "top",
+        duration: 5,
+        isSocket: true,
       });
 
-      socket.on("disconnect", () =>
-        console.log("❌ Disconnected from Socket.io")
-      );
-    } else {
-      socket.disconnect();
-      console.log("🚪 User logged out, socket disconnected.");
-    }
+      dispatch(addNotification(data));
+    });
+
+    socket.on("disconnect", (reason) => {
+      console.log("❌ Disconnected:", reason);
+    });
 
     return () => {
       socket.off("connect");
+      socket.off("connect_error");
       socket.off("notification");
       socket.off("disconnect");
+      socket.disconnect();
     };
-  }, [userCIFId, dispatch]);
+  }, [userCIFId, token]);
 
   return null;
 };

@@ -1,6 +1,7 @@
 import axios from "axios";
+import { API_ENDPOINTS } from "../../config/endpoint";
 
-const API_BASE_URL = "http://localhost:5000/api/orderHistory";
+const API_BASE_URL = API_ENDPOINTS.ORDER_HISTORY;
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -24,7 +25,6 @@ export const getOrderHistory = async (token) => {
     return handleError(error);
   }
 };
-
 
 const handleError = (error) => {
   if (error.response) {

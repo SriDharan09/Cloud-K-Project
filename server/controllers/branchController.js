@@ -1,7 +1,12 @@
 const { sequelize } = require("../models");
 const { Branch, AuditLog } = require("../models");
 const branchLogger = require("../utils/logger/branchLogger");
+const redis = require("../config/redis");
 
+const resetMenuCache = async () => {
+  await redis.del("menu:all");
+  await redis.del(`menu:${req.params.id}`);
+};
 exports.createBranch = async (req, res) => {
   const requestInfo = { method: req.method, url: req.url, body: req.body };
   const performedBy = req.userCIFId;
@@ -41,7 +46,7 @@ exports.createBranch = async (req, res) => {
       req: requestInfo,
       res: response,
     });
-
+    resetMenuCache();
     res.status(response.status).json(response);
   } catch (error) {
     const response = {
@@ -166,7 +171,7 @@ exports.updateBranch = async (req, res) => {
       req: requestInfo,
       res: response,
     });
-
+    resetMenuCache();
     res.json(response);
   } catch (error) {
     const response = {
@@ -217,7 +222,7 @@ exports.deleteBranch = async (req, res) => {
       req: requestInfo,
       res: response,
     });
-
+    resetMenuCache();
     res.json(response);
   } catch (error) {
     const response = {
@@ -310,7 +315,7 @@ exports.getBranchWithDetails = async (req, res) => {
 
         if (row.menuItemId) {
           let existingMenuItem = category.menuItems.find(
-            (m) => m.id === row.menuItemId
+            (m) => m.id === row.menuItemId,
           );
           if (!existingMenuItem) {
             category.menuItems.push({
@@ -452,7 +457,7 @@ exports.filterBranches = async (req, res) => {
 
         if (row.menuItemId) {
           let existingMenuItem = category.menuItems.find(
-            (m) => m.id === row.menuItemId
+            (m) => m.id === row.menuItemId,
           );
           if (!existingMenuItem) {
             category.menuItems.push({

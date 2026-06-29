@@ -1,6 +1,7 @@
 import axios from "axios";
+import { API_ENDPOINTS } from "../../config/endpoint";
 
-const API_BASE_URL = "http://localhost:5000/api/menu/";
+const API_BASE_URL = API_ENDPOINTS.MENU;
 
 export const getMenus = async () => {
   try {

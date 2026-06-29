@@ -1,12 +1,13 @@
 import axios from "axios";
+import { API_ENDPOINTS } from "../../config/endpoint";
 
-const API_BASE_URL = "http://localhost:5000/api";
+const API_BASE_URL = API_ENDPOINTS.AUTH;
 
 export const userLogin = async (credentials) => {
   try {
     const response = await axios.post(
       `${API_BASE_URL}/auth/login`,
-      credentials
+      credentials,
     );
     return response.data;
   } catch (error) {
@@ -42,7 +43,7 @@ export const userRegister = async (credentials) => {
 
     const response = await axios.post(
       `${API_BASE_URL}/auth/register`,
-      modifiedCredentials
+      modifiedCredentials,
     );
     return response.data;
   } catch (error) {
@@ -68,8 +69,86 @@ export const userVerification = async (details) => {
   try {
     const response = await axios.post(
       `${API_BASE_URL}/auth/verifyUser`,
-      details
+      details,
     );
+    return response.data;
+  } catch (error) {
+    if (error?.response) {
+      return {
+        success: false,
+        status: error.response.status,
+        title: error.response.data.title || "Error",
+        message:
+          error.response.data.error ||
+          error.response.data.message ||
+          "Something went wrong",
+      };
+    }
+  }
+};
+
+export const forgotPassword = async (email) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/auth/forgot`, email);
+    return response.data;
+  } catch (error) {
+    if (error?.response) {
+      return {
+        success: false,
+        status: error.response.status,
+        title: error.response.data.title || "Error",
+        message:
+          error.response.data.error ||
+          error.response.data.message ||
+          "Something went wrong",
+      };
+    }
+  }
+};
+
+export const resetPassword = async (details) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/auth/reset`, details);
+    return response.data;
+  } catch (error) {
+    if (error?.response) {
+      return {
+        success: false,
+        status: error.response.status,
+        title: error.response.data.title || "Error",
+        message:
+          error.response.data.error ||
+          error.response.data.message ||
+          "Something went wrong",
+      };
+    }
+  }
+};
+
+export const changePassword = async (details) => {
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}/auth/changepassword`,
+      details,
+    );
+    return response.data;
+  } catch (error) {
+    if (error?.response) {
+      return {
+        success: false,
+        status: error.response.status,
+        title: error.response.data.title || "Error",
+        message:
+          error.response.data.error ||
+          error.response.data.message ||
+          "Something went wrong",
+      };
+    }
+  }
+};
+export const userLogout = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/auth/logout`);
     return response.data;
   } catch (error) {
     if (error?.response) {

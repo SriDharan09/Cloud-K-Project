@@ -1,46 +1,58 @@
 const { Notification, NotificationTemplate, User } = require("../models");
-const { sendNotification, onlineUsers } = require("../utils/socket");
+const { sendNotification, isUserOnline } = require("../utils/socket");
+const { publish } = require("./messageBroker");
+const redis = require("../config/redis");
 const cron = require("node-cron");
-const { Op } = require("sequelize");
 
-// ✅ Fetch notification template and replace placeholders
 const getNotificationTemplate = async (key, replacements = {}) => {
-  const template = await NotificationTemplate.findOne({ where: { key } });
+  const cacheKey = `template:${key}`;
 
-  if (!template) {
-    console.warn(`⚠️ Template '${key}' not found in DB.`);
+  try {
+    const cached = await redis.get(cacheKey);
+    let template = cached ? JSON.parse(cached) : null;
+
+    if (!template) {
+      const row = await NotificationTemplate.findOne({ where: { key } });
+      if (!row) {
+        console.warn(`⚠️ Template '${key}' not found in DB`);
+        return null;
+      }
+      template = { title: row.title, message: row.message, type: row.type };
+      await redis.setex(cacheKey, 3600, JSON.stringify(template)); // cache 1hr
+      console.log(`📋 Template '${key}' cached in Redis`);
+    }
+
+    let { title, message, type } = template;
+    Object.keys(replacements).forEach((placeholder) => {
+      const regex = new RegExp(`{{${placeholder}}}`, "g");
+      title = title.replace(regex, replacements[placeholder] ?? "");
+      message = message.replace(regex, replacements[placeholder] ?? "");
+    });
+
+    return { title, message, type };
+  } catch (err) {
+    console.error(`❌ Template fetch error for '${key}':`, err.message);
     return null;
   }
-
-  let { title, message, type } = template;
-
-  // Replace placeholders dynamically
-  Object.keys(replacements).forEach((key) => {
-    title = title.replace(`{{${key}}}`, replacements[key]);
-    message = message.replace(`{{${key}}}`, replacements[key]);
-  });
-
-  return { title, message, type };
 };
 
 const notifyUser = async (
   userCIFId,
-  templateKey,
+  templateKey = null,
   replacements = {},
-  title,
-  message,
+  title = null,
+  message = null,
   type = "general",
   data = null,
 ) => {
   try {
-    const users = await User.findOne({
-      where: { isActive: true },
+    const user = await User.findOne({
+      where: { userCIFId, isActive: true },
       attributes: ["userCIFId"],
     });
-    if (!users) {
-      console.warn(
-        `⚠️ User ${userCIFId} not found or inactive. Skipping notification.`,
-      );
+
+    if (!user) {
+      console.warn(`⚠️ User '${userCIFId}' not found or inactive — skipping`);
       return null;
     }
 
@@ -52,6 +64,11 @@ const notifyUser = async (
       type = template.type;
     }
 
+    if (!title || !message) {
+      console.warn(`⚠️ Missing title/message for '${userCIFId}' — skipping`);
+      return null;
+    }
+
     const notification = await Notification.create({
       userCIFId,
       title,
@@ -61,98 +78,122 @@ const notifyUser = async (
       is_read: false,
     });
 
-    console.log(`📨 Notification sent to ${userCIFId}: ${title}`);
-
-    if (onlineUsers.has(userCIFId)) {
-      sendNotification(userCIFId, notification);
+    if (await isUserOnline(userCIFId)) {
+      await sendNotification(userCIFId, notification);
+      console.log(`⚡ Real-time push → ${userCIFId}: "${title}"`);
+    } else {
+      console.log(`💾 Stored for '${userCIFId}' — will receive on next login`);
     }
 
     return notification;
-  } catch (error) {
-    console.error("❌ Error sending notificationService:", error);
+  } catch (err) {
+    console.error(`❌ notifyUser error [${userCIFId}]:`, err.message);
+    return null;
   }
 };
 
-// 🔄 Notify multiple users at once
 const notifyMultipleUsers = async (
   userCIFIds,
   title,
   message,
   type = "general",
   data = null,
+  batchSize = 10, // process 10 at a time
 ) => {
-  await Promise.all(
-    userCIFIds.map((id) =>
-      notifyUser(id, null, {}, title, message, type, data),
-    ),
+  if (!userCIFIds?.length) return;
+
+  const chunks = [];
+  for (let i = 0; i < userCIFIds.length; i += batchSize) {
+    chunks.push(userCIFIds.slice(i, i + batchSize));
+  }
+
+  let sent = 0;
+  for (const chunk of chunks) {
+    await Promise.all(
+      chunk.map((id) => notifyUser(id, null, {}, title, message, type, data)),
+    );
+    sent += chunk.length;
+    console.log(`📨 Batch sent: ${sent}/${userCIFIds.length}`);
+  }
+
+  console.log(`✅ notifyMultipleUsers complete — ${sent} notifications`);
+};
+
+const sendOrderNotification = async (
+  orderId,
+  userCIFId,
+  status,
+  notificationKey = "orderStatusUpdate",
+) => {
+  return notifyUser(
+    userCIFId, // arg1 — who
+    notificationKey, // arg2 — which template
+    { orderId, status }, // arg3 — replacements for {{orderId}}, {{status}}
+    null, // arg4 — title from template
+    null, // arg5 — message from template
+    "order_status", // arg6 — type matches your ENUM
+    { orderId, status }, // arg7 — data payload for frontend
   );
 };
 
-// 🔄 Send Order Status Notification (Uses Template)
-const sendOrderNotification = async (orderId, userCIFId, status) => {
-  await notifyUser({
-    userCIFId,
-    templateKey: "orderStatusUpdate",
-    replacements: { orderId, status },
-    data: { orderId, status },
-  });
-};
-
-// 🔄 Send Bulk Promotional Notifications
 const sendBulkPromotion = async () => {
-  const users = await User.findAll({
-    where: { isActive: true },
-    attributes: ["userCIFId"],
-  });
-  console.log(users.length);
+  try {
+    const [users, templates] = await Promise.all([
+      User.findAll({ where: { isActive: true }, attributes: ["userCIFId"] }),
+      NotificationTemplate.findAll({
+        where: { type: ["promotion", "general"] },
+      }),
+    ]);
 
-  if (!users.length) {
-    return console.log("⚠️ No active users.");
+    if (!users.length) return console.log("⚠️ No active users for promotion");
+    if (!templates.length)
+      return console.log("⚠️ No promotion templates found");
+
+    // ✅ Publish to queue — consumer processes one by one, no DB flood
+    let queued = 0;
+    for (const user of users) {
+      const template = templates[Math.floor(Math.random() * templates.length)];
+      publish("promotion.send", {
+        userCIFId: user.userCIFId,
+        templateKey: template.key,
+      });
+      queued++;
+    }
+
+    console.log(`✅ Queued ${queued} promotional notifications`);
+  } catch (err) {
+    console.error("❌ sendBulkPromotion error:", err.message);
   }
-
-  const promotionTemplates = await NotificationTemplate.findAll({
-    where: { type: "promotion" },
-  });
-
-  const generalTemplates = await NotificationTemplate.findAll({
-    where: { type: "general" },
-  });
-
-  const templates = [...promotionTemplates, ...generalTemplates];
-
-  if (!templates.length) {
-    return console.log("⚠️ No promotion templates available.");
-  } else {
-    console.log(templates);
-  }
-
-  await Promise.all(
-    users.map(async (user) => {
-      const randomTemplate =
-        templates[Math.floor(Math.random() * templates.length)];
-      const replacements = {};
-
-      await notifyUser(user.userCIFId, randomTemplate.key, replacements);
-    }),
-  );
-
-  console.log(`✅ Sent promotional notifications to ${users.length} users.`);
+};
+const invalidateTemplateCache = async (key) => {
+  await redis.del(`template:${key}`);
+  console.log(`🗑️ Template cache cleared: '${key}'`);
 };
 
-// ⏰ Schedule Automated Notifications
+const invalidateAllTemplateCache = async () => {
+  const keys = await redis.keys("template:*");
+  if (keys.length) {
+    await redis.del(...keys);
+    console.log(`🗑️ Cleared ${keys.length} template caches`);
+  }
+};
+
 const startNotificationJobs = () => {
+  // Bulk promotion at 12pm and 8pm daily
   cron.schedule("0 12,20 * * *", async () => {
-    console.log("📢 Sending bulk promotional notifications...");
+    console.log("📢 Queueing bulk promotional notifications...");
     await sendBulkPromotion();
   });
-  cron.schedule("* * * * *", () => {
-    console.table(onlineUsers);
-  });
+
+  console.log("✅ Notification jobs scheduled");
 };
 
 module.exports = {
   notifyUser,
   notifyMultipleUsers,
   sendOrderNotification,
+  sendBulkPromotion,
   startNotificationJobs,
+  invalidateTemplateCache,
+  invalidateAllTemplateCache,
 };

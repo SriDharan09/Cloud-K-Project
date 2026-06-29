@@ -1,7 +1,8 @@
 // orderApi.js
 import axios from "axios";
+import { API_ENDPOINTS } from "../../config/endpoint";
 
-const API_BASE_URL = "http://localhost:5000/api/orders";
+const API_BASE_URL = API_ENDPOINTS.ORDERS;
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -82,4 +83,3 @@ const handleError = (error) => {
   }
   return { success: false, message: "Network error. Please try again later." };
 };
-

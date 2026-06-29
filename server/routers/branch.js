@@ -12,17 +12,31 @@ const {
 const authMiddleware = require("../middleware/auth");
 const adminAuth = require("../middleware/adminAuth");
 const createUploadMiddleware = require("../middleware/upload");
+const cache = require("../middleware/cache");
 const upload = createUploadMiddleware("branches");
 
-
 // Create a new branch
-router.post("/", upload.single("main_image"), authMiddleware, adminAuth, createBranch);
+router.post(
+  "/",
+  upload.single("main_image"),
+  authMiddleware,
+  adminAuth,
+  createBranch,
+);
 
 // Get all branches
-router.get("/", getBranches);
+router.get(
+  "/",
+  cache(() => "branch:all", 1800),
+  getBranches,
+);
 
 // Get a branch by ID
-router.get("/:id", getBranchById);
+router.get(
+  "/:id",
+  cache((req) => `branch:${req.params.id}`, 1800),
+  getBranchById,
+);
 
 // Update a branch by ID
 router.put("/:id", authMiddleware, adminAuth, updateBranch);

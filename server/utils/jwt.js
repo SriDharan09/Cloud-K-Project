@@ -1,6 +1,6 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
-const SECRET_KEY = "RASH";
+const SECRET_KEY = process.env.JWT_SECRET;
 
 const generateToken = (user) => {
   return jwt.sign(
@@ -9,10 +9,10 @@ const generateToken = (user) => {
       username: user.username,
       email: user.email,
       RoleId: user.RoleId,
-      userCIFId: user.userCIFId
+      userCIFId: user.userCIFId,
     },
     SECRET_KEY,
-    { expiresIn: '1h' }
+    { expiresIn: "1h" },
   );
 };
 

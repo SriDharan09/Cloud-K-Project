@@ -28,7 +28,7 @@ const updateOrderStatuses = async () => {
         } catch (err) {
           console.error(
             `❌ Error parsing estimatedDeliveryTime for Order ${order.id}:`,
-            err
+            err,
           );
           continue;
         }
@@ -82,10 +82,10 @@ const updateOrderStatuses = async () => {
             paymentStatus: update.paymentStatus,
             completedAt: update.completedAt,
           },
-          { where: { id: update.id } }
+          { where: { id: update.id } },
         );
         console.log(
-          `✅ Order ${update.id} updated to ${update.status}, Payment Status: ${update.paymentStatus}, Completed At: ${update.completedAt}`
+          `✅ Order ${update.id} updated to ${update.status}, Payment Status: ${update.paymentStatus}, Completed At: ${update.completedAt}`,
         );
         const orderHistory = await OrderHistory.findOne({
           where: { orderId: update.id },
@@ -101,7 +101,7 @@ const updateOrderStatuses = async () => {
             } catch (err) {
               console.error(
                 `❌ Error parsing snapshot for OrderHistory ${orderHistory.id}:`,
-                err
+                err,
               );
               continue; // Skip this order if snapshot is corrupted
             }
@@ -109,7 +109,7 @@ const updateOrderStatuses = async () => {
 
           if (typeof snapshot !== "object" || snapshot === null) {
             console.error(
-              `❌ Invalid snapshot format for OrderHistory ${orderHistory.id}, skipping update.`
+              `❌ Invalid snapshot format for OrderHistory ${orderHistory.id}, skipping update.`,
             );
             continue;
           }
@@ -126,11 +126,11 @@ const updateOrderStatuses = async () => {
               status: update.status,
               snapshot: snapshot,
             },
-            { where: { orderId: update.id } }
+            { where: { orderId: update.id } },
           );
 
           console.log(
-            `📌 Order History Updated | Order: ${update.id} | Status: ${update.status}`
+            `📌 Order History Updated | Order: ${update.id} | Status: ${update.status}`,
           );
         }
         if (update.notificationKey) {
@@ -140,7 +140,7 @@ const updateOrderStatuses = async () => {
             status: update.status,
           });
           console.log(
-            `📩 Notification Sent to ${update.orderBy} | Order: ${update.id} | Type: ${update.notificationKey}`
+            `📩 Notification Sent to ${update.orderBy} | Order: ${update.id} | Type: ${update.notificationKey}`,
           );
         }
       }

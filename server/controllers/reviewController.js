@@ -1,4 +1,4 @@
-const { Review } = require('../models');
+const { Review } = require("../models");
 
 // Add a review for a specific menu item
 exports.addReview = async (req, res) => {
@@ -7,10 +7,10 @@ exports.addReview = async (req, res) => {
     const { MenuItemId, rating, comment } = req.body;
 
     const newReview = await Review.create({
-      UserId : id,
+      UserId: id,
       MenuItemId,
       rating,
-      comment
+      comment,
     });
 
     res.json(newReview);
@@ -27,7 +27,7 @@ exports.updateReview = async (req, res) => {
 
     const review = await Review.findByPk(id);
     if (!review) {
-      return res.status(404).json({ error: 'Review not found' });
+      return res.status(404).json({ error: "Review not found" });
     }
 
     review.rating = rating;
@@ -48,12 +48,12 @@ exports.deleteReview = async (req, res) => {
 
     const review = await Review.findByPk(id);
     if (!review) {
-      return res.status(404).json({ error: 'Review not found' });
+      return res.status(404).json({ error: "Review not found" });
     }
 
     await review.destroy();
 
-    res.json({ message: 'Review deleted successfully' });
+    res.json({ message: "Review deleted successfully" });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

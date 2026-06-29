@@ -1,6 +1,7 @@
 import axios from "axios";
+import { API_ENDPOINTS } from "../../config/endpoint";
 
-const API_BASE_URL = "http://localhost:5000/api/branch/";
+const API_BASE_URL = API_ENDPOINTS.BRANCH;
 
 export const getBranchDetails = async () => {
   try {

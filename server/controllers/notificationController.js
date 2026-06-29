@@ -6,22 +6,23 @@ const { Notification } = require("../models");
 
 exports.sendNotification = async (req, res) => {
   try {
-    const { userCIFId, type, title, message, data } = req.body;
-    templateKey = "";
-    replacements = "";
-    console.log(req.body);
-    
+    const { userCIFId, templateKey, replacements, title, message, type, data } =
+      req.body;
+    if (!userCIFId)
+      return res.status(400).json({ error: "userCIFId required" });
+    if (!templateKey && !title)
+      return res.status(400).json({ error: "templateKey or title required" });
 
     console.log(`📨 Sending notification to ${userCIFId}: ${title}`);
 
     const notification = await notifyUser(
       userCIFId,
-      templateKey,
-      replacements,
-      title,
-      message,
-      type,
-      data,
+      templateKey || null,
+      replacements || {},
+      title || null,
+      message || null,
+      type || "general",
+      data || null,
     );
 
     return res.status(201).json({ success: true, notification });
@@ -38,7 +39,7 @@ exports.sendBulkNotifications = async (req, res) => {
     console.log(`📢 Sending bulk notifications to ${userCIFIds.length} users`);
 
     const io = req.app.get("io");
-    await notifyMultipleUsers(io, userCIFIds, title, message, type, data);
+    await notifyMultipleUsers(userCIFIds, title, message, type, data);
 
     return res
       .status(201)
@@ -85,7 +86,29 @@ exports.markAsRead = async (req, res) => {
     return res.status(500).json({ success: false, error: "Server error" });
   }
 };
-
+exports.markAllAsRead = async (req, res) => {
+  try {
+    await Notification.update(
+      { is_read: true },
+      { where: { userCIFId: req.userCIFId, is_read: false } },
+    );
+    return res
+      .status(200)
+      .json({ success: true, message: "All marked as read" });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};
+exports.getUnreadCount = async (req, res) => {
+  try {
+    const count = await Notification.count({
+      where: { userCIFId: req.userCIFId, is_read: false },
+    });
+    return res.status(200).json({ success: true, count });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};
 // Delete a notification
 exports.deleteNotification = async (req, res) => {
   try {

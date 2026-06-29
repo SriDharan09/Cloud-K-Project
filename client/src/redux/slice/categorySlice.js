@@ -44,7 +44,7 @@ const categorySlice = createSlice({
           state.statusCode = action.payload.status;
           state.error = action.payload;
         })
-        .addCase(resetStore, () => initialState);
+        //.addCase(resetStore, () => initialState);
   },
 });
 

@@ -46,32 +46,22 @@ exports.updateProfile = async (req, res) => {
 
     // Prepare update fields
     const updatedData = {};
-    if (username) updatedData.username = username;
-    if (phoneNumber) updatedData.phoneNumber = phoneNumber;
-    if (address) updatedData.address =address; // Store as JSON string
-    if (preferences) updatedData.preferences = preferences; // Store as JSON string
+    if (username !== undefined) updatedData.username = username;
+
+    if (phoneNumber !== undefined) updatedData.phoneNumber = phoneNumber;
+
+    if (address !== undefined) updatedData.address = address;
+
+    if (preferences !== undefined) updatedData.preferences = preferences;
 
     // Update the user
     await user.update(updatedData);
+    const updatedUser = await User.scope("detailedInfo").findByPk(userId);
 
     res.status(200).json({
       status: 200,
       message: "Profile updated successfully",
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        address: user.address, // Ensure correct parsing
-        profileImage: user.profileImage,
-        isEmailVerified: user.isEmailVerified,
-        isActive: user.isActive,
-        lastLoginAt: user.lastLoginAt,
-        preferences: user.preferences, // Ensure correct parsing
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-        RoleId: user.RoleId,
-      },
+      user: updatedUser,
     });
   } catch (error) {
     console.error("Error updating profile:", error);
@@ -171,7 +161,7 @@ exports.uploadProfileImage = async (req, res) => {
         if (result.result !== "ok") {
           console.warn(
             "⚠️ Warning: Image might not have been deleted. Cloudinary response:",
-            result
+            result,
           );
         }
       } catch (error) {

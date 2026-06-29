@@ -16,10 +16,10 @@ export const fetchMenuDetails = createAsyncThunk(
       return response;
     } catch (error) {
       return thunkApi.rejectWithValue(
-        error.response?.data?.error || "Menu Fetch failed"
+        error.response?.data?.error || "Menu Fetch failed",
       );
     }
-  }
+  },
 );
 
 const menuSlice = createSlice({
@@ -42,8 +42,8 @@ const menuSlice = createSlice({
         state.menuDetails = [];
         state.statusCode = action.payload.status;
         state.error = action.payload;
-      })
-      .addCase(resetStore, () => initialState);
+      });
+    //.addCase(resetStore, () => initialState);
   },
 });
 

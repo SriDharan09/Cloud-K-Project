@@ -1,6 +1,7 @@
 import axios from "axios";
+import { API_ENDPOINTS } from "../../config/endpoint";
 
-const API_BASE_URL = "http://localhost:5000/api/categories/";
+const API_BASE_URL = API_ENDPOINTS.CATEGORIES;
 
 export const getCategories = async () => {
   try {

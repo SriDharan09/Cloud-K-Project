@@ -1,19 +1,19 @@
-const { UserAddress } = require('../models');
+const { UserAddress } = require("../models");
 
 // Add a new address
 exports.addAddress = async (req, res) => {
   try {
     const { id } = req.user; // Assuming you get userId from auth middleware
-    console.log('User ID:', id); // Log user ID
+    console.log("User ID:", id); // Log user ID
     const { address, city, state, postalCode, country } = req.body;
 
     const newAddress = await UserAddress.create({
-      UserId :id ,
+      UserId: id,
       address,
       city,
       state,
-      postal_code :postalCode ,
-      country
+      postal_code: postalCode,
+      country,
     });
 
     res.json(newAddress);
@@ -30,7 +30,7 @@ exports.updateAddress = async (req, res) => {
 
     const userAddress = await UserAddress.findByPk(id);
     if (!userAddress) {
-      return res.status(404).json({ error: 'Address not found' });
+      return res.status(404).json({ error: "Address not found" });
     }
 
     userAddress.address = address;
@@ -54,12 +54,12 @@ exports.deleteAddress = async (req, res) => {
 
     const userAddress = await UserAddress.findByPk(id);
     if (!userAddress) {
-      return res.status(404).json({ error: 'Address not found' });
+      return res.status(404).json({ error: "Address not found" });
     }
 
     await userAddress.destroy();
 
-    res.json({ message: 'Address deleted successfully' });
+    res.json({ message: "Address deleted successfully" });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

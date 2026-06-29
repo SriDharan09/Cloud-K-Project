@@ -4,17 +4,29 @@ const authMiddleware = require("../middleware/auth");
 
 const notificationController = require("../controllers/notificationController");
 
-router.post("/send", authMiddleware, notificationController.sendNotification); // Send notification
+router.post("/send", authMiddleware, notificationController.sendNotification);
+router.post(
+  "/bulkSend",
+  authMiddleware,
+  notificationController.sendBulkNotifications,
+);
 router.get(
   "/userNotifications",
   authMiddleware,
-  notificationController.getUserNotifications
+  notificationController.getUserNotifications,
 );
-router.put("/read/:id", authMiddleware, notificationController.markAsRead); // Mark notification as read
+router.get(
+  "/getUnreadCount",
+  authMiddleware,
+  notificationController.getUnreadCount,
+);
+router.put("/read/:id", authMiddleware, notificationController.markAsRead);
+router.put("/read/all", authMiddleware, notificationController.markAllAsRead);
+
 router.delete(
   "/:id",
   authMiddleware,
-  notificationController.deleteNotification
+  notificationController.deleteNotification,
 );
 
 module.exports = router;

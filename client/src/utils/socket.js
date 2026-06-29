@@ -1,10 +1,11 @@
 import { io } from "socket.io-client";
+import { API_ENDPOINTS } from "../../config/endpoint";
 
-const SOCKET_URL = "http://localhost:5000"; // Change to backend URL in production
-
+const SOCKET_URL = API_ENDPOINTS.SOCKET;
 const socket = io(SOCKET_URL, {
-  transports: ["websocket"], // Ensure WebSocket transport is used
-  withCredentials: true, // Allows CORS credentials
+  transports: ["websocket"],
+  autoConnect: false,
+  withCredentials: true,
 });
 
 export default socket;

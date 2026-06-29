@@ -6,6 +6,7 @@ const getRequestInfo = require("../utils/getRequestInfo");
 const validatePassword = require("../utils/validatePassword");
 const sendEmail = require("../utils/sendEmail");
 const moment = require("moment-timezone");
+const redis = require("../config/redis");
 
 const {
   generateEmailTemplate,
@@ -35,7 +36,7 @@ const generateUniqueCIFId = async () => {
 
   while (!isUnique) {
     const randomNumber = String(
-      Math.floor(100000 + Math.random() * 900000)
+      Math.floor(100000 + Math.random() * 900000),
     ).padStart(6, "0");
     cifId = `${prefix}${randomNumber}`;
 
@@ -144,7 +145,7 @@ exports.register = async (req, res) => {
     const localVerificationUrl = `http://localhost:3000/verify?code=${verificationCode}`;
     const htmlContent = generateEmailTemplate(
       verificationCode,
-      localVerificationUrl
+      localVerificationUrl,
     );
     await sendEmail({
       to: email,
@@ -212,7 +213,7 @@ exports.verifyEmail = async (req, res) => {
       };
       logger.warn(
         "Verification failed - Invalid or expired verification code",
-        { req: requestInfo, res: response }
+        { req: requestInfo, res: response },
       );
       return res.status(response.status).json(response);
     }
@@ -419,8 +420,8 @@ exports.forgotPassword = async (req, res) => {
       resetTokenExpires,
     });
 
-    const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
-    console.log(resetToken);
+    const resetUrl = `${process.env.CLIENT_URL}/reset-password?token=${resetToken}`;
+    console.log("resetUrl", resetUrl);
     const htmlContent = generatePasswordResetTemplate(resetUrl);
     await sendEmail({
       to: user.email,
@@ -453,64 +454,67 @@ exports.forgotPassword = async (req, res) => {
 };
 
 exports.resetPassword = async (req, res) => {
-  const requestInfo = { method: req.method, url: req.url, body: req.body };
+  const requestInfo = {
+    method: req.method,
+    url: req.url,
+    body: req.body,
+  };
 
   try {
-    logger.info("Password reset attempt", { req: requestInfo });
+    const { newPassword } = req.body;
 
-    const { newPassword, email } = req.body;
-    const { atoken } = req.params;
-
-    logger.debug("Received reset token and newPassword", {
-      token: atoken,
-      newPassword,
-    });
+    const token = req.params.token;
 
     const user = await User.findOne({
       where: {
-        email,
-        resetToken: atoken,
-        resetTokenExpires: { [Op.gt]: Date.now() },
+        resetToken: token,
+        resetTokenExpires: {
+          [Op.gt]: Date.now(),
+        },
       },
     });
 
     if (!user) {
-      const response = { status: 400, error: "Invalid or expired token" };
-      logger.warn("Password reset failed - Invalid or expired token", {
-        req: requestInfo,
-        res: response,
+      return res.status(400).json({
+        error: "Invalid or expired token",
       });
-      return res.status(response.status).json(response);
     }
 
-    const passwordErrors = await validatePassword(newPassword);
-    if (passwordErrors.length > 0) {
-      const response = { status: 400, error: passwordErrors.join(", ") };
-      logger.warn("Password reset failed - Password validation failed", {
-        req: requestInfo,
-        res: response,
-      });
-      return res.status(response.status).json(response);
-    }
+    // const passwordErrors = await validatePassword(newPassword);
+
+    // if (passwordErrors.length) {
+    //   return res.status(400).json({
+    //     error: passwordErrors.join(", "),
+    //   });
+    // }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
+
     await user.update({
       password: hashedPassword,
       resetToken: null,
       resetTokenExpires: null,
     });
 
-    const response = { status: 200, message: "Password reset successfully" };
-    logger.info("Password reset successfully", {
+    return res.json({
+      message: "Password reset successfully",
+    });
+  } catch (error) {
+    logger.error("Error resetting password", {
       req: requestInfo,
-      res: response,
+      error,
     });
 
-    res.status(response.status).json(response);
-  } catch (error) {
-    logger.error("Error resetting password", { req: requestInfo, error });
-    res
-      .status(500)
-      .json({ error: "Failed to reset password. Please try again later." });
+    return res.status(500).json({
+      error: "Failed to reset password",
+    });
   }
+};
+exports.logout = async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (token) {
+    // blacklist token until it naturally expires
+    await redis.setex(`blacklist:${token}`, 3600, "1");
+  }
+  res.status(200).json({ message: "Logged out successfully" });
 };

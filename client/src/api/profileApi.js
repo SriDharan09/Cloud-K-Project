@@ -1,7 +1,7 @@
 import axios from "axios";
+import { API_ENDPOINTS } from "../../config/endpoint";
 
-const API_BASE_URL = "http://localhost:5000/api/profile";
-
+const API_BASE_URL = API_ENDPOINTS.PROFILE;
 // Create an axios instance
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,

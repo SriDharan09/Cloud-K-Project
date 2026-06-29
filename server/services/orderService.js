@@ -11,6 +11,7 @@ const {
   generateTrackingNumber,
 } = require("../utils/orderHelpers");
 const orderLogger = require("../utils/logger/ordersLogger");
+const { publish } = require("../utils/messageBroker");
 const { Op } = require("sequelize");
 
 const validateMenuItems = async (items, BranchId) => {
@@ -190,6 +191,12 @@ exports.createOrder = async (user, body, performedBy, req) => {
   orderLogger.info("Order created successfully", {
     orderId: order.id,
     performedBy,
+  });
+  publish("order.placed", {
+    orderId: order.id,
+    userCIFId: performedBy,
+    status: "pending",
+    snapshot: response,
   });
   return response;
 };

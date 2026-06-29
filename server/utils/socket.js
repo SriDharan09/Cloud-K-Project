@@ -1,48 +1,110 @@
 const { Server } = require("socket.io");
+const jwt = require("jsonwebtoken");
+const redis = require("../config/redis");
+const allowedOrigins = require("../config/allowedOrigins");
 
 let io;
-const onlineUsers = new Map(); // Store online users (userCIFId -> socketId)
+
+const setUserOnline = async (userCIFId, socketId) => {
+  await redis.setex(`online:${userCIFId}`, 86400, socketId);
+};
+
+const setUserOffline = async (userCIFId) => {
+  await redis.del(`online:${userCIFId}`);
+};
+
+const getUserSocketId = async (userCIFId) => {
+  return redis.get(`online:${userCIFId}`);
+};
+
+const isUserOnline = async (userCIFId) => {
+  const socketId = await getUserSocketId(userCIFId);
+  return !!socketId;
+};
 
 const initializeSocket = (server) => {
   io = new Server(server, {
-    cors: { origin: "*" },
+    cors: {
+      origin: allowedOrigins,
+      credentials: true,
+    },
   });
 
-  io.on("connection", (socket) => {
-    console.log("✅ User connected:", socket.id);
+  io.use((socket, next) => {
+    const token = socket.handshake.auth?.token;
 
-    // Register user when they log in
-    socket.on("registerUser", (userCIFId) => {
-      onlineUsers.set(userCIFId, socket.id);
-      console.log(`🟢 User ${userCIFId} is online (Socket ID: ${socket.id})`);
-    });
+    console.log("📡 Socket auth:", socket.handshake.auth);
 
-    // Handle user disconnect
-    socket.on("disconnect", () => {
-      for (const [userCIFId, socketId] of onlineUsers.entries()) {
-        if (socketId === socket.id) {
-          onlineUsers.delete(userCIFId);
-          console.log(`🔴 User ${userCIFId} disconnected`);
-          break;
-        }
+    if (!token) {
+      return next(new Error("Unauthorized"));
+    }
+
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      socket.user = decoded;
+
+      next();
+    } catch (err) {
+      console.error("❌ JWT verify failed:", err.message);
+
+      next(new Error("Invalid token"));
+    }
+  });
+
+  io.on("connection", async (socket) => {
+    try {
+      const userCIFId = socket.user.userCIFId;
+
+      if (!userCIFId) {
+        console.log("⚠️ No userCIFId in token");
+
+        return socket.disconnect(true);
       }
-    });
+
+      await setUserOnline(userCIFId, socket.id);
+
+      socket.userCIFId = userCIFId;
+
+      console.log(`🟢 ${userCIFId} connected (${socket.id})`);
+
+      socket.on("disconnect", async (reason) => {
+        await setUserOffline(userCIFId);
+
+        console.log(`🔴 ${userCIFId} disconnected (${reason})`);
+      });
+    } catch (err) {
+      console.error("❌ Socket connection error:", err.message);
+
+      socket.disconnect(true);
+    }
   });
 
   return io;
 };
 
-// ✅ Function to send real-time notifications ONLY to online users
-const sendNotification = (userCIFId, notification) => {
-  if (!io) return console.error("❌ Socket.io is not initialized");
+const sendNotification = async (userCIFId, notification) => {
+  if (!io) {
+    console.error("❌ Socket.io not initialized");
+    return;
+  }
 
-  const userSocketId = onlineUsers.get(userCIFId);
-  if (userSocketId) {
-    io.to(userSocketId).emit("notification", notification);
-    console.log(`📨 Sent real-time notification to ${userCIFId}`);
+  const socketId = await getUserSocketId(userCIFId);
+
+  if (socketId) {
+    io.to(socketId).emit("notification", notification);
+
+    console.log(`📨 Real-time push → ${userCIFId}`);
   } else {
-    console.log(`⚠️ User ${userCIFId} is offline, notification stored in DB.`);
+    console.log(`💾 ${userCIFId} offline — saved in DB`);
   }
 };
 
-module.exports = { initializeSocket, sendNotification, onlineUsers };
+module.exports = {
+  initializeSocket,
+  sendNotification,
+  setUserOnline,
+  setUserOffline,
+  isUserOnline,
+  getUserSocketId,
+};

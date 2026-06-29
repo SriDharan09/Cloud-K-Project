@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { userLogin, userRegister } from "../../api/authApi.js";
+import { userLogin, userRegister, userLogout } from "../../api/authApi.js";
 import { fetchNotifications } from "./notificationSlice.js";
 import { resetStore } from "./resetSlice.js";
 
@@ -37,10 +37,10 @@ export const loginAsync = createAsyncThunk(
       return userData;
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.error || "Login failed"
+        error.response?.data?.error || "Login failed",
       );
     }
-  }
+  },
 );
 
 export const signUpAsync = createAsyncThunk(
@@ -53,20 +53,27 @@ export const signUpAsync = createAsyncThunk(
       return { ...userData, email: credentials.email };
     } catch (error) {
       return thunkAPI.rejectWithValue(
-        error.response?.data?.error || "Signup failed"
+        error.response?.data?.error || "Signup failed",
       );
     }
-  }
+  },
 );
+
+export const logout = createAsyncThunk("auth/logout", async (_, thunkAPI) => {
+  try {
+    const userData = await userLogout();
+    return userData;
+  } catch (error) {
+    return thunkAPI.rejectWithValue(
+      error.response?.data?.error || "Logout failed",
+    );
+  }
+});
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    logout: (state) => {
-      localStorage.clear();
-      return initialState;
-    },
     setUser: (state, action) => {
       state.user = action.payload.user;
       state.token = action.payload.token;
@@ -117,10 +124,31 @@ const authSlice = createSlice({
         state.statusCode = action.payload.status;
         state.error = action.payload || "Signup failed";
       })
+      .addCase(logout.fulfilled, (state) => {
+        state.user = null;
+        state.token = null;
+        state.statusCode = null;
+        state.errorCode = null;
+        state.loading = false;
+        state.error = null;
+        state.preLogin = true;
+        state.isAdmin = false;
+        state.isUserLogin = false;
+        state.token = null;
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+        localStorage.removeItem("CIFID");
+        localStorage.removeItem("role");
+      })
+      .addCase(logout.rejected, (state, action) => {
+        state.loading = false;
+        state.statusCode = action.payload.status;
+        state.error = action.payload || "Logout failed";
+      })
       .addCase(resetStore, () => initialState);
   },
 });
 
-export const { logout, setUser, setUserEmail, setUpdateUser } =
+export const { setUser, setUserEmail, setUpdateUser } =
   authSlice.actions;
 export default authSlice.reducer;
